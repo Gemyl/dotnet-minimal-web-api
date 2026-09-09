@@ -1,15 +1,12 @@
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MyWebApi.Data;
 using MyWebApi.Models;
 
 namespace MyWebApi.Endpoints;
 
 public static class ProductEndpoints
 {
-    private static readonly List<Product> _products =
-    [
-            new Product { Id = 1, Name = "Laptop", Price = 999.99m },
-            new Product { Id = 2, Name = "Mouse", Price = 25.50m }
-    ];
-
     public static void MapProductEndpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/api/products");
@@ -21,42 +18,44 @@ public static class ProductEndpoints
         group.MapDelete("/{id:int}", DeleteProduct);
     }
 
-    private static IResult GetAllProducts() => Results.Ok(_products);
-
-    private static IResult GetProductById(int id)
+    private static async Task<IResult> GetAllProducts(AppDbContext db)
     {
-        var selectedProduct = _products.FirstOrDefault((p) => p.Id == id);
-        if (selectedProduct == null) return Results.NotFound();
-
-        return Results.Ok(selectedProduct);
+        var products = await db.Products.ToListAsync();
+        return Results.Ok(products);
     }
 
-    private static IResult CreateProduct(Product newProduct)
+    private static async Task<IResult> GetProductById(int id, AppDbContext db)
     {
-        newProduct.Id = _products.Max((p) => p.Id) + 1;
-        _products.Add(newProduct);
+        var product = await db.Products.FindAsync(id);
+        return product is not null ? Results.Ok(product) : Results.NotFound();
+    }
 
+    private static async Task<IResult> CreateProduct(Product newProduct, AppDbContext db)
+    {
+        db.Products.Add(newProduct);
+        await db.SaveChangesAsync();
         return Results.Ok(newProduct);
     }
 
-    private static IResult UpdateProduct(Product updatedProduct)
+    private static async Task<IResult> UpdateProduct(Product updatedProduct, AppDbContext db)
     {
-        var selectedProduct = _products.FirstOrDefault((p) => p.Id == updatedProduct.Id);
-        if (selectedProduct == null) return Results.NotFound();
+        var product = await db.Products.FindAsync(updatedProduct.Id);
+        if (product == null) return Results.NotFound();
 
-        selectedProduct.Name = updatedProduct.Name;
-        selectedProduct.Price = updatedProduct.Price;
+        product.Name = updatedProduct.Name;
+        product.Price = updatedProduct.Price;
 
-        return Results.Ok(selectedProduct);
+        await db.SaveChangesAsync();
+        return Results.Ok(product);
     }
 
-    private static IResult DeleteProduct(int id)
+    private static async Task<IResult> DeleteProduct(int id, AppDbContext db)
     {
-        var selectedProduct = _products.FirstOrDefault((p) => p.Id == id);
-        if (selectedProduct == null) return Results.NotFound();
+        var product = await db.Products.FindAsync(id);
+        if (product is null) return Results.Ok();
 
-        _products.Remove(selectedProduct);
-
-        return Results.Ok(selectedProduct.Id);
+        db.Products.Remove(product);
+        await db.SaveChangesAsync();
+        return Results.Ok(product.Id);
     }
 }
