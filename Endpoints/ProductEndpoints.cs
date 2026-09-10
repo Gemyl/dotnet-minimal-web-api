@@ -1,7 +1,7 @@
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyWebApi.Data;
 using MyWebApi.Models;
+using MyWebApi.DTOs;
 
 namespace MyWebApi.Endpoints;
 
@@ -20,33 +20,58 @@ public static class ProductEndpoints
 
     private static async Task<IResult> GetAllProducts(AppDbContext db)
     {
-        var products = await db.Products.ToListAsync();
+        var products = await db.Products
+        .Select(p => new ProductDto(p.Id, p.Name, p.Price))
+        .ToListAsync();
+
         return Results.Ok(products);
     }
 
     private static async Task<IResult> GetProductById(int id, AppDbContext db)
     {
         var product = await db.Products.FindAsync(id);
-        return product is not null ? Results.Ok(product) : Results.NotFound();
+        return product is not null 
+        ? Results.Ok(new ProductDto(product.Id, product.Name, product.Price)) 
+        : Results.NotFound();
     }
 
-    private static async Task<IResult> CreateProduct(Product newProduct, AppDbContext db)
+    private static async Task<IResult> CreateProduct(CreateProductDto newProduct, AppDbContext db)
     {
-        db.Products.Add(newProduct);
+        if (string.IsNullOrWhiteSpace(newProduct.Name))
+        {
+            return Results.BadRequest(new {error = "'Name' field is mandatory"});
+        } 
+
+        if (newProduct.Price <= 0)
+        {
+            return Results.BadRequest(new {error = "A product's price must be greater than 0"});
+        }
+
+        var product = new Product
+        {
+            Name = newProduct.Name,
+            Price = newProduct.Price
+        };
+
+        db.Products.Add(product);
         await db.SaveChangesAsync();
-        return Results.Ok(newProduct);
+
+        var responseDto = new ProductDto(product.Id, product.Name, product.Price);
+        return Results.Ok(responseDto);
     }
 
-    private static async Task<IResult> UpdateProduct(Product updatedProduct, AppDbContext db)
+    private static async Task<IResult> UpdateProduct(Product product, AppDbContext db)
     {
-        var product = await db.Products.FindAsync(updatedProduct.Id);
-        if (product == null) return Results.NotFound();
+        var selectedProduct = await db.Products.FindAsync(product.Id);
+        if (selectedProduct == null) return Results.NotFound();
 
-        product.Name = updatedProduct.Name;
-        product.Price = updatedProduct.Price;
+        selectedProduct.Name = product.Name;
+        selectedProduct.Price = product.Price;
 
         await db.SaveChangesAsync();
-        return Results.Ok(product);
+
+        var responseDto = new ProductDto(selectedProduct.Id, selectedProduct.Name, selectedProduct.Price);
+        return Results.Ok(responseDto);
     }
 
     private static async Task<IResult> DeleteProduct(int id, AppDbContext db)
