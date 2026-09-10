@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWebApi.Data;
 using MyWebApi.Models;
 using MyWebApi.DTOs;
+using MyWebApi.Fitlers;
 
 namespace MyWebApi.Endpoints;
 
@@ -13,7 +14,7 @@ public static class ProductEndpoints
 
         group.MapGet("/", GetAllProducts);
         group.MapGet("/{id:int}", GetProductById);
-        group.MapPost("/", CreateProduct);
+        group.MapPost("/", CreateProduct).AddEndpointFilter<ValidationFilter<CreateProductDto>>();
         group.MapPut("/", UpdateProduct);
         group.MapDelete("/{id:int}", DeleteProduct);
     }
@@ -37,16 +38,6 @@ public static class ProductEndpoints
 
     private static async Task<IResult> CreateProduct(CreateProductDto newProduct, AppDbContext db)
     {
-        if (string.IsNullOrWhiteSpace(newProduct.Name))
-        {
-            return Results.BadRequest(new {error = "'Name' field is mandatory"});
-        } 
-
-        if (newProduct.Price <= 0)
-        {
-            return Results.BadRequest(new {error = "A product's price must be greater than 0"});
-        }
-
         var product = new Product
         {
             Name = newProduct.Name,
