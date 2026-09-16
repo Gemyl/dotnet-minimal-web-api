@@ -58,3 +58,9 @@ nunit-*.xml
 
 *.db*
 app.db
+.vscode
+public
+.editorconfig
+.prettierrc
+node_modules
+.angular

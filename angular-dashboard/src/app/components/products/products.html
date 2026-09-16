@@ -1,0 +1,9 @@
+<div style="display: flex; flex-direction: column; width: 10rem;">
+    <span><strong>Products List</strong></span>
+    @for(item of products(); track item.id){
+        <div style="display: flex; flex-direction: row; justify-content: space-between; width: 10rem;">
+            <p>{{item.name}}</p>
+            <p>${{item.price}}</p>
+        </div>
+    }
+</div>
