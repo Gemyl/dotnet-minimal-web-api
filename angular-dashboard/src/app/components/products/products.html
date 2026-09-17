@@ -1,4 +1,10 @@
 <div style="display: flex; flex-direction: column; width: 10rem;">
+    <span><strong>Add a product</strong></span>
+    <div style="display: flex; flex-direction: column; width: 20rem; justify-content: center; align-items: start; margin: .5rem 0 2rem 0;">
+        <input type="text" placeholder="Enter name" [formField]="loginForm.name" style="width: 45%;"/>
+        <input type="number" placeholder="Enter price" [formField]="loginForm.price" style="width: 45%;"/>
+        <button type="button" (click)="onFormSubmit($event)" style="margin-top: .5rem;">Submit</button>
+    </div>
     <span><strong>Products List</strong></span>
     @for(item of products(); track item.id){
         <div style="display: flex; flex-direction: row; justify-content: space-between; width: 10rem;">

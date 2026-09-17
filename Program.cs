@@ -23,6 +23,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyMethod()
+              .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
     });
@@ -36,6 +37,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowFrontend");
 
 app.UseExceptionHandler();
 
