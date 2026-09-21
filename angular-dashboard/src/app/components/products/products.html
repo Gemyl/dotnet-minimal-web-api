@@ -1,15 +1,21 @@
-<div style="display: flex; flex-direction: column; width: 10rem;">
-    <span><strong>Add a product</strong></span>
-    <div style="display: flex; flex-direction: column; width: 20rem; justify-content: center; align-items: start; margin: .5rem 0 2rem 0;">
-        <input type="text" placeholder="Enter name" [formField]="loginForm.name" style="width: 45%;"/>
-        <input type="number" placeholder="Enter price" [formField]="loginForm.price" style="width: 45%;"/>
-        <button type="button" (click)="onFormSubmit($event)" style="margin-top: .5rem;">Submit</button>
-    </div>
-    <span><strong>Products List</strong></span>
-    @for(item of products(); track item.id){
-        <div style="display: flex; flex-direction: row; justify-content: space-between; width: 10rem;">
-            <p>{{item.name}}</p>
-            <p>${{item.price}}</p>
+<div class="flex flex-col justify-between gap-y-5 ml-5 mt-5">
+    <div>
+        <span><strong>Add a product</strong></span>
+        <div class="flex flex-col justify-between items-start gap-y-2 w-[50%]">
+            <input type="text" placeholder="Enter name" [formField]="loginForm.name" class="border border-black p-1 rounded-md w-full"/>
+            <input type="number" placeholder="Enter price" [formField]="loginForm.price" class="border border-black p-1 rounded-md w-full"/>
+            <button class="bg-black rounded-full text-white cursor-pointer w-full py-1" type="button" (click)="onFormSubmit($event)">Submit</button>
         </div>
-    }
+    </div>
+    <div class="flex flex-col w-full items-start">
+        <span><strong>Products List</strong></span>
+        <div class="flex flex-col justify-between gap-y-2">
+            @for(item of products(); track item.id){
+                <div class="flex flex-row justify-between w-40 border border-black rounded-full px-2 py-1">
+                    <p>{{item.name}}</p>
+                    <p>${{item.price}}</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>
