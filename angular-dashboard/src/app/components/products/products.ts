@@ -31,4 +31,11 @@ export class Products implements OnInit{
     }});
   }
 
+  protected deleteProduct(id: number) {
+    this._productsService.deleteProduct(id).subscribe((response) => {
+      console.log(`Product with ID ${response} successfully deleted`);
+      this._productsService.query.set({value: ''});
+    });
+  }
+
 }
