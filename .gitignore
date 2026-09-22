@@ -64,3 +64,4 @@ public
 .prettierrc
 node_modules
 .angular
+Migrations
