@@ -15,12 +15,11 @@
                     <p>Loading items...</p>
                 } @else if (_productsService.productsResource.error()) {
                     <p class="text-red-600">An error occured. Try again.</p>
-                } @else {
+                } @else if (_productsService.productsResource.value().length > 0) {
                     @for(item of _productsService.productsResource.value(); track item.id){
                         <div class="flex flex-row w-full justify-between">
-                            <div class="flex flex-row justify-between items-center border border-black rounded-full px-2 py-1 gap-x-2">
-                                <p>{{item.name}}</p>
-                                <p>${{item.price}}</p>
+                            <div class="flex flex-row justify-between items-center border border-black rounded-full px-2 py-1">
+                                {{item.name}} ${{item.price}}
                             </div>
                             <div class="flex flex-row justify-evenly w-[50%]">
                                 <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full cursor-pointer"
@@ -28,6 +27,8 @@
                             </div>
                         </div>
                     }
+                } @else {
+                    <p>No products in the list</p>
                 }
             </div>
         } @placeholder {
