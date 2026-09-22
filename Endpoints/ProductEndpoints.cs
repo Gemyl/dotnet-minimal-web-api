@@ -13,10 +13,10 @@ public static class ProductEndpoints
         var group = routes.MapGroup("/api/products");
 
         group.MapGet("/", GetAllProducts);
-        group.MapGet("/{id:int}", GetProductById);
+        group.MapGet("/{id:Guid}", GetProductById);
         group.MapPost("/", CreateProduct).AddEndpointFilter<ValidationFilter<CreateProductDto>>();
         group.MapPut("/", UpdateProduct);
-        group.MapDelete("/{id:int}", DeleteProduct);
+        group.MapDelete("/{id:Guid}", DeleteProduct);
     }
 
     private static async Task<IResult> GetAllProducts(AppDbContext db)
@@ -28,7 +28,7 @@ public static class ProductEndpoints
         return Results.Ok(products);
     }
 
-    private static async Task<IResult> GetProductById(int id, AppDbContext db)
+    private static async Task<IResult> GetProductById(Guid id, AppDbContext db)
     {
         var product = await db.Products.FindAsync(id);
         return product is not null 
@@ -40,6 +40,7 @@ public static class ProductEndpoints
     {
         var product = new Product
         {
+            Id = Guid.NewGuid(),
             Name = newProduct.Name,
             Price = newProduct.Price
         };
@@ -65,7 +66,7 @@ public static class ProductEndpoints
         return Results.Ok(responseDto);
     }
 
-    private static async Task<IResult> DeleteProduct(int id, AppDbContext db)
+    private static async Task<IResult> DeleteProduct(Guid id, AppDbContext db)
     {
         var product = await db.Products.FindAsync(id);
         if (product is null) return Results.Ok();
