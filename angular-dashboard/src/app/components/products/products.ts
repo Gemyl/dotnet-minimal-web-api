@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { ProductsService } from '../../services/products/products';
-import { CreateProduct } from '../../models/products.model';
+import { CreateProduct, Product } from '../../models/products.model';
 import { form, FormField } from '@angular/forms/signals';
 
 @Component({
@@ -11,11 +11,17 @@ import { form, FormField } from '@angular/forms/signals';
 })
 export class Products implements OnInit{
   public products: any = signal([]);
-  public loginModel = signal<CreateProduct>({
+  public createProductModel = signal<CreateProduct>({
     name: '',
     price: null
   });
-  public loginForm = form(this.loginModel);
+  public editProductModel = signal<Product>({
+    id: '',
+    name: '',
+    price: null
+  });
+  public createProductForm = form(this.createProductModel);
+  protected editProductForm = form(this.editProductModel);
   protected _productsService = inject(ProductsService);
 
   ngOnInit(): void {
@@ -24,17 +30,38 @@ export class Products implements OnInit{
 
   public onFormSubmit(event: Event) {
     event.preventDefault();
-    this._productsService.createProduct(this.loginModel()).subscribe((response) => {
+    this._productsService.createProduct(this.createProductModel()).subscribe((response) => {
       if(response.id) {
         console.log(`Product created with ID ${response.id}`);
         this._productsService.query.set({value: ''});
     }});
   }
 
-  protected deleteProduct(id: number) {
+  protected deleteProduct(id: string) {
     this._productsService.deleteProduct(id).subscribe((response) => {
       console.log(`Product with ID ${response} successfully deleted`);
       this._productsService.query.set({value: ''});
+    });
+  }
+
+  protected selectProductForEdit(product: Product) {
+    this.editProductModel.set(product);
+  }
+
+  protected saveChanges() {
+    this._productsService.updateProduct(this.editProductModel())
+    .subscribe((response: Product) => {
+      console.log(response);
+      this.cancelEdit();
+      this._productsService.query.set({value: ''});
+    });
+  }
+
+  protected cancelEdit() {
+    this.editProductModel.set({
+      id: '',
+      name: '',
+      price: null
     });
   }
 

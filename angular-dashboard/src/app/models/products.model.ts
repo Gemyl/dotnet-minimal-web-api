@@ -4,5 +4,5 @@ export interface CreateProduct {
 }
 
 export interface Product extends CreateProduct {
-    id: number
+    id: string
 }
