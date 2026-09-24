@@ -23,6 +23,7 @@ export class Products implements OnInit{
   public createProductForm = form(this.createProductModel);
   protected editProductForm = form(this.editProductModel);
   protected _productsService = inject(ProductsService);
+  protected hoveredItemIndex = signal(-1);
 
   ngOnInit(): void {
     this._productsService.query.set({value: ''})
@@ -63,6 +64,14 @@ export class Products implements OnInit{
       name: '',
       price: null
     });
+  }
+
+  onItemHover(index: number) {
+    this.hoveredItemIndex.set(index);
+  }
+
+  onItemLeave() {
+    this.hoveredItemIndex.set(-1);
   }
 
 }

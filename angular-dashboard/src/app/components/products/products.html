@@ -16,27 +16,29 @@
                 } @else if (_productsService.productsResource.error()) {
                     <p class="text-red-600">An error occured. Try again.</p>
                 } @else if (_productsService.productsResource.value().length > 0) {
-                    @for(item of _productsService.productsResource.value(); track item.id){
+                    @for(item of _productsService.productsResource.value(); track item.id; let idx = $index;){
                         <div class="flex flex-row w-full justify-between">
                             <div class="flex flex-row justify-between items-center border border-black rounded-full px-2 py-1 w-[50%]">
                                 @if (editProductModel().id != item.id) {
                                     <p>{{item.name}}</p> <p class="ml-2">${{item.price}}</p>
                                 } @else {
-                                    <input type="text" [formField]="editProductForm.name" class="border border-black rounded-full px-2 py-1 w-[45%]"/>
-                                    <input type="number" [formField]="editProductForm.price" class="border border-black rounded-full px-2 py-1 w-[45%] ml-2"/>
+                                    <input type="text" [formField]="editProductForm.name" class="border border-black rounded-full px-2 w-[45%]"/>
+                                    <input type="number" [formField]="editProductForm.price" class="border border-black rounded-full px-2 w-[45%] ml-2"/>
                                 }
                             </div>
-                            <div class="flex flex-row justify-evenly w-[50%]">
+                            <div class="flex flex-row justify-content gap-2 w-[50%] ps-4" (mouseover)="onItemHover(idx)" (mouseleave)="onItemLeave()">
                                 @if (editProductModel().id != item.id) {
-                                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full cursor-pointer"
-                                    (click)="selectProductForEdit(item)">Edit</button>
-                                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full cursor-pointer"
-                                    (click)="deleteProduct(item.id)">Delete</button>
+                                    @if (idx == hoveredItemIndex()) {
+                                        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
+                                        (click)="selectProductForEdit(item)"><i class="fa fa-edit"></i></button>
+                                        <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
+                                        (click)="deleteProduct(item.id)"><i class="fa fa-trash"></i></button>
+                                    }
                                 } @else {
-                                    <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full cursor-pointer"
-                                    (click)="saveChanges()">Save</button>
-                                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full cursor-pointer"
-                                    (click)="cancelEdit()">Cancel</button>
+                                    <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
+                                    (click)="saveChanges()"><i class="fa fa-save"></i></button>
+                                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
+                                    (click)="cancelEdit()"><i class="fa fa-cancel"></i></button>
                                 }
                             </div>
                         </div>
