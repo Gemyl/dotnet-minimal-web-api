@@ -12,5 +12,8 @@ public class CreateProductDtoValidator : AbstractValidator<CreateProductDto>
 
         RuleFor(x => x.Price)
             .GreaterThan(0).WithMessage("Field 'price' must have a positive value.");
+
+        RuleFor(x => x.CategoryId)
+            .NotNull().WithMessage("Each product needs to be affiliated with a category.");
     }
 }

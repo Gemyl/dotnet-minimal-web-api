@@ -44,6 +44,8 @@ app.UseExceptionHandler();
 
 app.MapProductEndpoints();
 
+app.MapCategoryEndpoints();
+
 app.UseHttpsRedirection();
 
 app.Run();

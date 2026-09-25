@@ -1,8 +1,6 @@
-
-using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 
-namespace MyWebApi.Fitlers;
+namespace MyWebApi.Filters;
 
 public class ValidationFilter<T> : IEndpointFilter where T : class
 {

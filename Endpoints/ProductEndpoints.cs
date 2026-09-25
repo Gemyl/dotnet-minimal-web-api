@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWebApi.Data;
 using MyWebApi.Models;
 using MyWebApi.DTOs;
-using MyWebApi.Fitlers;
+using MyWebApi.Filters;
 
 namespace MyWebApi.Endpoints;
 
@@ -22,7 +22,7 @@ public static class ProductEndpoints
     private static async Task<IResult> GetAllProducts(AppDbContext db)
     {
         var products = await db.Products
-        .Select(p => new ProductDto(p.Id, p.Name, p.Price))
+        .Select(p => new ProductDto(p.Id, p.Name, p.Price, p.CategoryId))
         .ToListAsync();
 
         return Results.Ok(products);
@@ -32,7 +32,7 @@ public static class ProductEndpoints
     {
         var product = await db.Products.FindAsync(id);
         return product is not null 
-        ? Results.Ok(new ProductDto(product.Id, product.Name, product.Price)) 
+        ? Results.Ok(new ProductDto(product.Id, product.Name, product.Price, product.CategoryId)) 
         : Results.NotFound();
     }
 
@@ -42,13 +42,14 @@ public static class ProductEndpoints
         {
             Id = Guid.NewGuid(),
             Name = newProduct.Name,
-            Price = newProduct.Price
+            Price = newProduct.Price,
+            CategoryId = newProduct.CategoryId
         };
 
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
-        var responseDto = new ProductDto(product.Id, product.Name, product.Price);
+        var responseDto = new ProductDto(product.Id, product.Name, product.Price, product.CategoryId);
         return Results.Ok(responseDto);
     }
 
@@ -59,10 +60,11 @@ public static class ProductEndpoints
 
         selectedProduct.Name = product.Name;
         selectedProduct.Price = product.Price;
+        selectedProduct.CategoryId = product.CategoryId;
 
         await db.SaveChangesAsync();
 
-        var responseDto = new ProductDto(selectedProduct.Id, selectedProduct.Name, selectedProduct.Price);
+        var responseDto = new ProductDto(selectedProduct.Id, selectedProduct.Name, selectedProduct.Price, selectedProduct.CategoryId);
         return Results.Ok(responseDto);
     }
 
