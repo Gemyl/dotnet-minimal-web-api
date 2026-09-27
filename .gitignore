@@ -65,3 +65,4 @@ public
 node_modules
 .angular
 Migrations
+dist

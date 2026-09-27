@@ -49,7 +49,7 @@ public static class CategoryEndpoints
         db.Categories.Add(newCategory);
         await db.SaveChangesAsync();
 
-        return Results.Ok(newCategory);
+        return Results.Ok(newCategory.Id);
     }
 
     private static async Task<IResult> UpdateCategory(AppDbContext db, UpdateCategoryDto dto)
@@ -61,12 +61,7 @@ public static class CategoryEndpoints
 
         await db.SaveChangesAsync();
 
-        var response = new UpdateCategoryDto(
-            category.Id,
-            category.Name
-        );
-
-        return Results.Ok(response);
+        return Results.Ok(category.Id);
     }
 
     private static async Task<IResult> DeleteCategory(AppDbContext db, Guid id)

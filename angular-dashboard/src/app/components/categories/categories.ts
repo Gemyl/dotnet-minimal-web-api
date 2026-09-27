@@ -1,0 +1,74 @@
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { form, FormField } from '@angular/forms/signals';
+import { CategoriesService } from '../../services/categories/categories';
+import { Category } from '../../models/categories.model';
+
+@Component({
+  selector: 'app-categories',
+  imports: [FormField],
+  providers: [CategoriesService],
+  templateUrl: './categories.html',
+  styleUrl: './categories.css',
+})
+export class Categories implements OnInit {
+  protected categories = signal([]);
+  protected createCategoryModel = signal({name: ''});
+  protected editCategoryModel = signal({id: '', name: ''});
+  protected createCategoryForm = form(this.createCategoryModel);
+  protected editCategoryForm = form(this.editCategoryModel);
+  protected _categoriesService = inject(CategoriesService);
+  protected hoveredItemIndex = signal(-1);
+
+  ngOnInit(): void {
+    this.GetAllCategories();
+  }
+
+  protected GetAllCategories(): void {
+    this._categoriesService.query.set({value: ''});
+  }
+
+  protected onFormSubmit(): void {
+    this._categoriesService.createCategory(this.createCategoryModel())
+    .subscribe((response: string) => {
+      if (response) {
+        console.log(`Category with ID ${response} created.`);
+        this._categoriesService.query.set({value: ''});
+      }
+    });
+  }
+
+  protected deleteCategory(id: string) {
+    this._categoriesService.deleteCategory(id).subscribe((response) => {
+      console.log(`Product with ID ${response} successfully deleted`);
+      this._categoriesService.query.set({value: ''});
+    });
+  }
+
+  protected selectCategoryForEdit(category: Category) {
+    this.editCategoryModel.set(category);
+  }
+
+  protected saveChanges() {
+    this._categoriesService.updateCategory(this.editCategoryModel())
+    .subscribe((response: string) => {
+      console.log(response);
+      this.cancelEdit();
+      this._categoriesService.query.set({value: ''});
+    });
+  }
+
+  protected cancelEdit() {
+    this.editCategoryModel.set({
+      id: '',
+      name: ''
+    });
+  }
+
+  onItemHover(index: number) {
+    this.hoveredItemIndex.set(index);
+  }
+
+  onItemLeave() {
+    this.hoveredItemIndex.set(-1);
+  }
+}

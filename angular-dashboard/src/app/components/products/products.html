@@ -4,7 +4,14 @@
         <div class="flex flex-col justify-between items-start gap-y-2 w-[50%]">
             <input type="text" placeholder="Enter name" [formField]="createProductForm.name" class="border border-black p-1 rounded-md w-full"/>
             <input type="number" placeholder="Enter price" [formField]="createProductForm.price" class="border border-black p-1 rounded-md w-full"/>
-            <button class="bg-black rounded-full text-white cursor-pointer w-full py-1" type="button" (click)="onFormSubmit($event)">Submit</button>
+            <select class="border border-black p-1 rounded-md w-full" [formField]="createProductForm.categoryId">
+                    <option [value]="''" selected>--Select Category--</option>
+                @for (item of _categoriesService.categoriesResource.value(); track item.id) {
+                    <option [value]="item.id">{{item.name}}</option>
+                }
+            </select>
+            <button class="bg-black rounded-full text-white cursor-pointer w-full py-1" type="button" (click)="onFormSubmit($event)" 
+            [disabled]="createProductForm().invalid()">Submit</button>
         </div>
     </div>
     <div class="flex flex-col w-full items-start">
