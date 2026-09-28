@@ -20,7 +20,7 @@ export class ProductsService {
     if (!this.isBrowser) return undefined;
     return `http://localhost:5000/api/products/${this.query().value}`
   }, {
-    defaultValue: []
+    defaultValue: undefined
   });
 
   public createProduct(payload: CreateProduct): Observable<Product> {

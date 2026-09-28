@@ -1,9 +1,9 @@
 <div class="flex flex-row justify-start mt-5 w-full ps-5">
-    <div class="p-4 flex flex-col items-center rounded-xl bg-gray-100 border border-gray-300 shadow-xl w-1/4">
+    <div class="p-4 flex flex-col items-center rounded-xl bg-gray-100 border border-gray-300 shadow-xl w-1/4 h-fit">
         <div class="flex flex-col justify-between items-start gap-y-2 mt-2 w-full">
             <input type="text" placeholder="Enter name" [formField]="createProductForm.name" class="border border-black p-1 rounded-md w-full"/>
             <input type="number" placeholder="Enter price" [formField]="createProductForm.price" class="border border-black p-1 rounded-md w-full"/>
-            <select class="border border-black p-1 rounded-md w-full" [formField]="createProductForm.categoryId">
+            <select class="border border-black p-1 rounded-md w-full" [style.color]="createProductModel().categoryId == '' ? 'gray' : 'black'" [formField]="createProductForm.categoryId">
                 <option [value]="''" disabled selected hidden>Select category</option>
                 @for (item of _categoriesService.categoriesResource.value(); track item.id) {
                     <option [value]="item.id">{{item.name}}</option>
@@ -17,12 +17,12 @@
     <div class="flex flex-col w-1/2 items-start ms-5">
         @defer (hydrate on immediate) {
             <div class="flex flex-col justify-between w-full">
-                @if (_productsService.productsResource.isLoading()) {
+                @if (_productsService.productsResource.isLoading() || !_productsService.productsResource.hasValue()) {
                     <p>Loading items...</p>
                 } @else if (_productsService.productsResource.error()) {
                     <p class="text-red-600">An error occured. Try again.</p>
-                } @else if (data().length > 0) {
-                    @for(item of data(); track item.id; let idx = $index;){
+                } @else if (products().length > 0) {
+                    @for(item of products(); track item.id; let idx = $index;){
                         <div class="flex flex-row w-full justify-start bg-gray-100 hover:bg-gray-200 py-2 mb-2 rounded-xl shadow-md">
                             <div class="flex flex-row justify-start items-center px-2 py-1 w-3/4">
                                 @if (editProductModel().id != item.id) {
@@ -65,7 +65,7 @@
                 }
             </div>
         } @placeholder {
-            <p>Loading items...</p>
+            <p>Loading items (defer)...</p>
         }
     </div>
 </div>

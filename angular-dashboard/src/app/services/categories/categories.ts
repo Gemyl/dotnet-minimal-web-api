@@ -19,7 +19,7 @@ export class CategoriesService {
       if (!this.isBrowser) return undefined;
       return `http://localhost:5000/api/categories/${this.query().value}`
     },{
-      defaultValue: []
+      defaultValue: undefined
     }
   );
 

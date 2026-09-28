@@ -12,7 +12,6 @@ import { Category } from '../../models/categories.model';
   providers: [ProductsService],
 })
 export class Products implements OnInit {
-  public products: any = signal([]);
   public createProductModel = signal<CreateProduct>({
     name: '',
     price: null,
@@ -33,7 +32,7 @@ export class Products implements OnInit {
   protected _productsService = inject(ProductsService);
   protected _categoriesService = inject(CategoriesService);
   protected hoveredItemIndex = signal(-1);
-  protected data = computed(() => {
+  protected products = computed(() => {
     if (this._productsService.productsResource.hasValue() && this._categoriesService.categoriesResource.hasValue()) {
       let products: any = [];
       this._productsService.productsResource.value().forEach((product: Product) => {
@@ -41,7 +40,7 @@ export class Products implements OnInit {
           ...product,
           ...{
             categoryName: this._categoriesService.categoriesResource.value()
-            .find((category: Category) => category.id == product.categoryId)
+            ?.find((category: Category) => category.id == product.categoryId)
             ?.name
           }
         };

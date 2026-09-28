@@ -9,7 +9,6 @@ input, select {
 
 select {
   background-color: #fff;
-  color: #333;
   appearance: none;        /* removes native arrow */
   -webkit-appearance: none;
   cursor: pointer;

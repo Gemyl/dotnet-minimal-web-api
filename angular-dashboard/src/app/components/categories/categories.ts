@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { CategoriesService } from '../../services/categories/categories';
 import { Category } from '../../models/categories.model';
@@ -11,13 +11,19 @@ import { Category } from '../../models/categories.model';
   styleUrl: './categories.css',
 })
 export class Categories implements OnInit {
-  protected categories = signal([]);
   protected createCategoryModel = signal({name: ''});
   protected editCategoryModel = signal({id: '', name: ''});
   protected createCategoryForm = form(this.createCategoryModel);
   protected editCategoryForm = form(this.editCategoryModel);
   protected _categoriesService = inject(CategoriesService);
   protected hoveredItemIndex = signal(-1);
+    protected categories = computed(() => {
+    if (this._categoriesService.categoriesResource.hasValue()) {
+      return this._categoriesService.categoriesResource.value();
+    } else {
+      return []
+    };
+  })
 
   ngOnInit(): void {
     this.GetAllCategories();
