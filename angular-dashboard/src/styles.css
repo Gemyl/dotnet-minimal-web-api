@@ -14,3 +14,9 @@ select {
   cursor: pointer;
   outline: none;
 }
+
+.global-frame {
+  margin-left: 80px;
+  padding: 20px;
+  padding-left: 20px;
+}

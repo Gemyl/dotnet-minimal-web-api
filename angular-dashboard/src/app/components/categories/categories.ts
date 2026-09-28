@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
+import { form, FormField, min, minLength, required } from '@angular/forms/signals';
 import { CategoriesService } from '../../services/categories/categories';
 import { Category } from '../../models/categories.model';
 
@@ -13,7 +13,10 @@ import { Category } from '../../models/categories.model';
 export class Categories implements OnInit {
   protected createCategoryModel = signal({name: ''});
   protected editCategoryModel = signal({id: '', name: ''});
-  protected createCategoryForm = form(this.createCategoryModel);
+  protected createCategoryForm = form(this.createCategoryModel, (f) => {
+    required(f.name, {message: 'Each category must have a name'});
+    minLength(f.name, 2, {message: 'Category name must be at least 2 characters long'});
+  });
   protected editCategoryForm = form(this.editCategoryModel);
   protected _categoriesService = inject(CategoriesService);
   protected hoveredItemIndex = signal(-1);

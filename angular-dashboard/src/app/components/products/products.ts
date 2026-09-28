@@ -57,8 +57,7 @@ export class Products implements OnInit {
     this._categoriesService.query.set({ value: '' });
   }
 
-  public onFormSubmit(event: Event) {
-    event.preventDefault();
+  public onFormSubmit() {
     this._productsService.createProduct(this.createProductModel()).subscribe((response) => {
       if (response.id) {
         console.log(`Product created with ID ${response.id}`);
