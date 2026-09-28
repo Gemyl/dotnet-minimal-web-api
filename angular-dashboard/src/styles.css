@@ -1,2 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
+input, select {
+    background-color: white;
+    border-color: rgb(199, 199, 199);
+    outline: none;
+}  
+
+select {
+  background-color: #fff;
+  color: #333;
+  appearance: none;        /* removes native arrow */
+  -webkit-appearance: none;
+  cursor: pointer;
+  outline: none;
+}

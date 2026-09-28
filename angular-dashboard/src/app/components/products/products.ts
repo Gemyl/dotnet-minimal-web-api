@@ -1,8 +1,9 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { ProductsService } from '../../services/products/products';
 import { CreateProduct, Product } from '../../models/products.model';
 import { form, FormField, required, validate } from '@angular/forms/signals';
 import { CategoriesService } from '../../services/categories/categories';
+import { Category } from '../../models/categories.model';
 
 @Component({
   selector: 'app-products',
@@ -32,6 +33,25 @@ export class Products implements OnInit {
   protected _productsService = inject(ProductsService);
   protected _categoriesService = inject(CategoriesService);
   protected hoveredItemIndex = signal(-1);
+  protected data = computed(() => {
+    if (this._productsService.productsResource.hasValue() && this._categoriesService.categoriesResource.hasValue()) {
+      let products: any = [];
+      this._productsService.productsResource.value().forEach((product: Product) => {
+        product = {
+          ...product,
+          ...{
+            categoryName: this._categoriesService.categoriesResource.value()
+            .find((category: Category) => category.id == product.categoryId)
+            ?.name
+          }
+        };
+
+        products.push(product);
+      })
+
+      return products;
+    } else return [];
+  })
 
   ngOnInit(): void {
     this._productsService.query.set({ value: '' });
