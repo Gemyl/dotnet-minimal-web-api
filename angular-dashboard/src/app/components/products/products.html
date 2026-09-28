@@ -16,29 +16,38 @@
     </div>
     <div class="flex flex-col w-1/2 items-start ms-5">
         @defer (hydrate on immediate) {
-            <div class="flex flex-col justify-between w-full">
+            <div class="flex flex-col justify-between items-center w-full my-auto">
                 @if (_productsService.productsResource.isLoading() || !_productsService.productsResource.hasValue()) {
-                    <p>Loading products...</p>
+                    <mat-progress-spinner mode="indeterminate" diameter="50">
+                    </mat-progress-spinner>
+                    <p class="mt-4 text-lg">Loading products</p>
                 } @else if (_productsService.productsResource.error()) {
                     <p class="text-red-600">An error occured. Try again.</p>
                 } @else if (products().length > 0) {
+                    <div
+                        class="w-full flex flex-row justify-start items-center h-10 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 text-lg px-4 text-center align-middle">
+                        <p class="w-1/4 text-start">Title</p>
+                        <p class="w-1/4 text-start px-2">Price</p>
+                        <p class="w-1/4 text-start px-2">Category</p>
+                        <p class="w-1/4 text-center px-4">Actions</p>
+                    </div>
                     @for(item of products(); track item.id; let idx = $index;){
                         <div class="flex flex-row w-full justify-start bg-gray-100 hover:bg-gray-200 py-2 mb-2 rounded-xl shadow-md">
                             <div class="flex flex-row justify-start items-center px-2 py-1 w-3/4">
                                 @if (editProductModel().id != item.id) {
                                     <div class="w-1/3">
-                                        <p class="w-fit rounded-full px-2">{{item.name}}</p> 
+                                        <p class="w-fit rounded-full px-2 py-1">{{item.name}}</p> 
                                     </div>
                                     <div class="w-1/3">
-                                        <p class="w-fit rounded-full text-green-600 px-2 ml-2">${{item.price}}</p>
+                                        <p class="w-fit rounded-full text-green-600 px-2 py-1 ml-2">${{item.price}}</p>
                                     </div>
                                     <div class="w-1/3">
-                                        <p class="w-fit rounded-full bg-yellow-300 text-black px-2 ml-2">{{item.categoryName}}</p>
+                                        <p class="w-fit rounded-full bg-yellow-300 text-black px-2 py-1 ml-2">{{item.categoryName}}</p>
                                     </div>
                                 } @else {
-                                    <input type="text" [formField]="editProductForm.name" class="border border-black rounded-full px-2 w-1/3"/>
-                                    <input type="number" [formField]="editProductForm.price" class="border border-black rounded-full px-2 w-1/3 ml-2"/>
-                                    <select class="border border-black rounded-full px-2 w-1/3 ml-2" [formField]="editProductForm.categoryId">
+                                    <input type="text" [formField]="editProductForm.name" class="border border-black rounded-full px-2 py-1 w-1/3"/>
+                                    <input type="number" [formField]="editProductForm.price" class="border border-black rounded-full px-2 py-1 w-1/3 ml-2"/>
+                                    <select class="border border-black rounded-full px-2 py-1 w-1/3 ml-2" [formField]="editProductForm.categoryId">
                                         @for(category of _categoriesService.categoriesResource.value(); track category.id) {
                                             <option [value]="category.id">{{category.name}}</option>
                                         }

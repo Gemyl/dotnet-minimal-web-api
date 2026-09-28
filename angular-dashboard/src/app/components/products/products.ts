@@ -4,10 +4,11 @@ import { CreateProduct, Product } from '../../models/products.model';
 import { form, FormField, required, validate } from '@angular/forms/signals';
 import { CategoriesService } from '../../services/categories/categories';
 import { Category } from '../../models/categories.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-products',
-  imports: [FormField],
+  imports: [FormField, MatProgressSpinnerModule],
   templateUrl: './products.html',
   providers: [ProductsService],
 })

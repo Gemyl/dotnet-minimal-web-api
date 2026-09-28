@@ -2,10 +2,11 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { form, FormField, min, minLength, required } from '@angular/forms/signals';
 import { CategoriesService } from '../../services/categories/categories';
 import { Category } from '../../models/categories.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-categories',
-  imports: [FormField],
+  imports: [FormField, MatProgressSpinnerModule],
   providers: [CategoriesService],
   templateUrl: './categories.html',
   styleUrl: './categories.css',
