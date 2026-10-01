@@ -8,51 +8,47 @@
         </div>
     </div>
     <div class="flex flex-col w-1/2 items-start ms-5">
-        @defer (hydrate on immediate) {
-            <div class="flex flex-col justify-between items-center w-full my-auto">
-                @if (_categoriesService.categoriesResource.isLoading() || !_categoriesService.categoriesResource.hasValue()) {
-                    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-                    <p class="mt-4 text-lg">Loading categories</p>
-                } @else if (_categoriesService.categoriesResource.error()) {
-                    <p class="text-red-600">An error occured. Try again.</p>
-                } @else if (categories().length > 0) {
-                    <div
-                        class="w-full flex flex-row justify-start items-center h-10 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 text-lg px-4 text-center align-middle">
-                        <p class="w-3/4 text-start">Title</p>
-                        <p class="w-1/4 text-center px-4">Actions</p>
-                    </div>
-                    @for(item of categories(); track item.id; let idx = $index;){
-                        <div class="flex flex-row w-full justify-start bg-gray-100 hover:bg-gray-200 py-2 mb-2 rounded-xl shadow-md">
-                            <div class="flex flex-row justify-start items-center px-2 py-1 w-3/4">
-                                @if (editCategoryModel().id != item.id) {
-                                    <div class="w-full">
-                                        <p class="w-fit rounded-full px-2 py-1">{{item.name}}</p> 
-                                    </div>
-                                } @else {
-                                    <input type="text" [formField]="editCategoryForm.name" class="border border-black rounded-full px-2 py-1 w-1/3"/>
-                                }
-                            </div>
-                            <div class="flex flex-row justify-evenly w-1/4" (mouseover)="onItemHover(idx)" (mouseleave)="onItemLeave()">
-                                @if (editCategoryModel().id != item.id) {
-                                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
-                                    (click)="selectCategoryForEdit(item)"><i class="fa fa-edit"></i></button>
-                                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
-                                    (click)="deleteCategory(item.id)"><i class="fa fa-trash"></i></button>
-                                } @else {
-                                    <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
-                                    (click)="saveChanges()"><i class="fa fa-save"></i></button>
-                                    <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
-                                    (click)="cancelEdit()"><i class="fa fa-cancel"></i></button>
-                                }
-                            </div>
+        <div class="flex flex-col justify-between items-center w-full my-auto">
+            @if (_categoriesService.categoriesResource.isLoading() || !_categoriesService.categoriesResource.hasValue()) {
+                <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+                <p class="mt-4 text-lg">Loading categories</p>
+            } @else if (_categoriesService.categoriesResource.error()) {
+                <p class="text-red-600">An error occured. Try again.</p>
+            } @else if (categories().length > 0) {
+                <div
+                    class="w-full flex flex-row justify-start items-center h-10 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 text-lg px-4 text-center align-middle">
+                    <p class="w-3/4 text-start">Title</p>
+                    <p class="w-1/4 text-center px-4">Actions</p>
+                </div>
+                @for(item of categories(); track item.id; let idx = $index;){
+                    <div class="flex flex-row w-full justify-start bg-gray-100 hover:bg-gray-200 py-2 mb-2 rounded-xl shadow-md">
+                        <div class="flex flex-row justify-start items-center px-2 py-1 w-3/4">
+                            @if (editCategoryModel().id != item.id) {
+                                <div class="w-full">
+                                    <p class="w-fit rounded-full px-2 py-1">{{item.name}}</p> 
+                                </div>
+                            } @else {
+                                <input type="text" [formField]="editCategoryForm.name" class="border border-black rounded-full px-2 py-1 w-1/3"/>
+                            }
                         </div>
-                    }
-                } @else {
-                    <p>No categories in the list</p>
+                        <div class="flex flex-row justify-evenly w-1/4" (mouseover)="onItemHover(idx)" (mouseleave)="onItemLeave()">
+                            @if (editCategoryModel().id != item.id) {
+                                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
+                                (click)="selectCategoryForEdit(item)"><i class="fa fa-edit"></i></button>
+                                <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
+                                (click)="deleteCategory(item.id)"><i class="fa fa-trash"></i></button>
+                            } @else {
+                                <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
+                                (click)="saveChanges()"><i class="fa fa-save"></i></button>
+                                <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded-full cursor-pointer"
+                                (click)="cancelEdit()"><i class="fa fa-cancel"></i></button>
+                            }
+                        </div>
+                    </div>
                 }
-            </div>
-        } @placeholder {
-            <p>Loading categories...</p>
-        }
+            } @else {
+                <p>No categories in the list</p>
+            }
+        </div>
     </div>
 </div>
