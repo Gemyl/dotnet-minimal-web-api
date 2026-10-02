@@ -1,7 +1,7 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { ProductsService } from '../../services/products/products';
 import { CreateProduct, Product } from '../../models/products.model';
-import { form, FormField, required, validate } from '@angular/forms/signals';
+import { form, FormField, required } from '@angular/forms/signals';
 import { CategoriesService } from '../../services/categories/categories';
 import { Category } from '../../models/categories.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   templateUrl: './products.html',
   providers: [ProductsService],
 })
-export class Products implements OnInit {
+export class Products {
   public createProductModel = signal<CreateProduct>({
     name: '',
     price: null,
@@ -34,8 +34,9 @@ export class Products implements OnInit {
   protected _categoriesService = inject(CategoriesService);
   protected hoveredItemIndex = signal(-1);
   protected products = computed(() => {
-    if (this._productsService.productsResource.hasValue() && this._categoriesService.categoriesResource.hasValue()) {
+    if (this._productsService.productsResource.hasValue()) {
       let products: any = [];
+      
       this._productsService.productsResource.value().forEach((product: Product) => {
         product = {
           ...product,
@@ -52,11 +53,6 @@ export class Products implements OnInit {
       return products;
     } else return [];
   })
-
-  ngOnInit(): void {
-    this._productsService.query.set({ value: '' });
-    this._categoriesService.query.set({ value: '' });
-  }
 
   public onFormSubmit() {
     this._productsService.createProduct(this.createProductModel()).subscribe((response) => {

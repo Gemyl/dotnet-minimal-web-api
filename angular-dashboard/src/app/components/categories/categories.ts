@@ -1,5 +1,5 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { form, FormField, min, minLength, required } from '@angular/forms/signals';
+import { Component, inject, signal, computed } from '@angular/core';
+import { form, FormField, minLength, required } from '@angular/forms/signals';
 import { CategoriesService } from '../../services/categories/categories';
 import { Category } from '../../models/categories.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -11,7 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   templateUrl: './categories.html',
   styleUrl: './categories.css',
 })
-export class Categories implements OnInit {
+export class Categories {
   protected createCategoryModel = signal({name: ''});
   protected editCategoryModel = signal({id: '', name: ''});
   protected createCategoryForm = form(this.createCategoryModel, (f) => {
@@ -21,21 +21,13 @@ export class Categories implements OnInit {
   protected editCategoryForm = form(this.editCategoryModel);
   protected _categoriesService = inject(CategoriesService);
   protected hoveredItemIndex = signal(-1);
-    protected categories = computed(() => {
+  protected categories = computed(() => {
     if (this._categoriesService.categoriesResource.hasValue()) {
       return this._categoriesService.categoriesResource.value();
     } else {
       return []
     };
   })
-
-  ngOnInit(): void {
-    this.GetAllCategories();
-  }
-
-  protected GetAllCategories(): void {
-    this._categoriesService.query.set({value: ''});
-  }
 
   protected onFormSubmit(): void {
     this._categoriesService.createCategory(this.createCategoryModel())
