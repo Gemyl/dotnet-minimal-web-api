@@ -6,23 +6,35 @@ using MyWebApi.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// 1. Core Services & EF Core PostgreSQL
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-	options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 2. Redis Cache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "MyApiCache_";
+});
+
+// 3. Validation & Exception Handling
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+// 4. CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyMethod()
+        policy.WithOrigins(
+                  "http://localhost:4200",
+                  "http://localhost:5000",
+                  "https://localhost:5001"
+              )
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -31,21 +43,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseExceptionHandler();
 
 app.UseCors("AllowFrontend");
 
-app.UseExceptionHandler();
+app.UseHttpsRedirection();
 
 app.MapProductEndpoints();
-
 app.MapCategoryEndpoints();
-
-app.UseHttpsRedirection();
 
 app.Run();
