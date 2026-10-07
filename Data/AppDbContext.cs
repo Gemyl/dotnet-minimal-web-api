@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using MyWebApi.Models;
 
 namespace MyWebApi.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<User>
 {
 	public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
 	public DbSet<Product> Products => Set<Product>();

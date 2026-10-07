@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MyWebApi.Data;
 using MyWebApi.Endpoints;
 using MyWebApi.Handlers;
+using MyWebApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,9 +32,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                  "http://localhost:4200",
-                  "http://localhost:5000",
-                  "https://localhost:5001"
+                  "http://localhost:4200"
               )
               .AllowAnyMethod()
               .AllowAnyHeader()
@@ -41,7 +40,14 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAuthorization();
+
+builder.Services.AddIdentityApiEndpoints<User>().AddEntityFrameworkStores<AppDbContext>();
+
 var app = builder.Build();
+
+// map authorization endpoints (/register, /login, /refresh etc)
+app.MapGroup("/auth").MapIdentityApi<User>();
 
 app.UseExceptionHandler();
 
