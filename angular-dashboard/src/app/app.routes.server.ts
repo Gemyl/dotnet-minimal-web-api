@@ -12,5 +12,9 @@ export const serverRoutes: ServerRoute[] = [
   {
     path: 'categories',
     renderMode: RenderMode.Server
+  },
+  {
+    path: 'login',
+    renderMode: RenderMode.Server
   }
 ];

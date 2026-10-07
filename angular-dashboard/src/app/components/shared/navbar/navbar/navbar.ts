@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../../services/authentication/authentication';
 
 @Component({
   selector: 'app-navbar',
@@ -11,4 +12,9 @@ import { Router } from '@angular/router';
 
 export class Navbar {
   protected router = inject(Router);
+  private _auth = inject(AuthenticationService);
+
+  logout() {
+    this._auth.logout();
+  }
 }
