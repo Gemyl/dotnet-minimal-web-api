@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { httpResource, HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Category, CreateCategory, UpdateCategory } from '../../models/categories.model';
+import { Category, CreateCategory, UpdateCategory } from '../../../features/models/categories.model';
 import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 

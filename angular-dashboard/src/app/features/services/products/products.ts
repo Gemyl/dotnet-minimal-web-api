@@ -1,7 +1,7 @@
 import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateProduct, Product } from '../../models/products.model';
+import { CreateProduct, Product } from '../../../features/models/products.model';
 import { httpResource } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 
