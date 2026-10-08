@@ -1,8 +1,9 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { AuthSession, LoginRequest, TokenResponse } from '../models/auth.model';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
+import { SKIP_AUTH } from '../helpers/auth.tokens';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,10 @@ export class AuthService {
   public login(req: LoginRequest): Observable<TokenResponse>{
     return this._http.post<TokenResponse>(
       `${this._identityUrl}/login`,
-      req
+      req,
+      {
+        context: new HttpContext().set(SKIP_AUTH, true)
+      }
     ).pipe(
       tap((response) => {this.setSession(response)})
     )
