@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { AuthSession, LoginRequest, TokenResponse } from '../models/auth.model';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
@@ -10,10 +11,11 @@ export class AuthService {
   private readonly _session = signal<AuthSession | null>(null);
   public readonly _isAuthenticated = computed(() => this._session() != null);
   private readonly _http = inject(HttpClient);
+  private readonly _identityUrl = environment.IDENTITY_URL;
 
   public login(req: LoginRequest): Observable<TokenResponse>{
     return this._http.post<TokenResponse>(
-      "http://localhost:5000/auth/login",
+      `${this._identityUrl}/login`,
       req
     ).pipe(
       tap((response) => {this.setSession(response)})
