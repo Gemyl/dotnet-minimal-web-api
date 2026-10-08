@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { form, FormField } from '@angular/forms/signals';
+import { form, FormField, required } from '@angular/forms/signals';
 import { AuthService } from '../../../services/auth-service';
 import { Router } from '@angular/router';
 
@@ -15,7 +15,10 @@ export class Login {
     email: '',
     password: ''
   });
-  protected loginForm = form(this.loginModel);
+  protected loginForm = form(this.loginModel, (f) => {
+    required(f.email);
+    required(f.password);
+  });
   private _authService = inject(AuthService);
   private readonly _router = inject(Router);
 
