@@ -31,9 +31,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-                  "http://localhost:4200"
-              )
+        policy.WithOrigins("http://localhost:4200")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -46,12 +44,14 @@ builder.Services.AddIdentityApiEndpoints<User>().AddEntityFrameworkStores<AppDbC
 
 var app = builder.Build();
 
-// map authorization endpoints (/register, /login, /refresh etc)
-app.MapGroup("/auth").MapIdentityApi<User>();
-
 app.UseExceptionHandler();
 
 app.UseCors("AllowFrontend");
+
+app.UseAuthorization();
+
+// map authorization endpoints (/register, /login, /refresh etc)
+app.MapGroup("/auth").MapIdentityApi<User>();
 
 app.UseHttpsRedirection();
 
