@@ -3,9 +3,11 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth-service';
 import { AUTH_RETRIED, SKIP_AUTH } from '../helpers/auth.tokens';
+import { Router } from '@angular/router';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
 
   if (req.context.get(SKIP_AUTH)) {
     return next(req);
@@ -61,6 +63,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               refreshError.status === 403)
           ) {
             authService.clearSession();
+            router.navigate(["/login"]);
           }
 
           return throwError(() => refreshError);

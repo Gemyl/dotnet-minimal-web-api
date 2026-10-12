@@ -110,16 +110,7 @@ export class AuthService {
 
     const request$ = this.refreshAccessToken()
     .pipe(
-      tap((response) => {
-        this._session.update(value => (
-          {
-            ...value,
-            ...{
-              accessToken: response.accessToken,
-              expiresAt: Date.now() + response.expiresIn * 1000
-            }
-          }
-        ));
+      tap(() => {
         this.authStatus.set(AuthStatus.Authenticated);
       }),
 
