@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { AuthSession, LoginRequest, TokenResponse } from '../models/auth.model';
+import { AuthSession, LoginRequest, TokenResponse, AuthStatus, RefreshResponse } from '../models/auth.model';
 import { HttpClient, HttpContext } from '@angular/common/http';
-import { finalize, Observable, shareReplay, tap, throwError } from 'rxjs';
+import { catchError, finalize, map, Observable, of, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { SKIP_AUTH } from '../helpers/auth.tokens';
 
@@ -11,20 +11,45 @@ import { SKIP_AUTH } from '../helpers/auth.tokens';
 export class AuthService {
   private readonly _session = signal<AuthSession | null>(null);
   public readonly _isAuthenticated = computed(() => this._session() != null);
-  private refreshInFlight$: Observable<TokenResponse> | null = null;
+  private refreshInFlight$: Observable<RefreshResponse> | null = null;
   private readonly _http = inject(HttpClient);
   private readonly _identityUrl = environment.IDENTITY_URL;
+  private authStatus = signal<AuthStatus>(AuthStatus.Pending);
+  private initializationInFlight$: Observable<boolean> | null = null;
+  private initializationCompleted: boolean = false;
 
   public login(req: LoginRequest): Observable<TokenResponse>{
     return this._http.post<TokenResponse>(
       `${this._identityUrl}/login`,
       req,
       {
+        withCredentials: true,
         context: new HttpContext().set(SKIP_AUTH, true)
       }
     ).pipe(
-      tap((response) => {this.setSession(response)})
+      tap((response) => {
+        this.setSession(response);
+        this.authStatus.set(AuthStatus.Authenticated);
+        this.initializationCompleted = true;
+      })
     )
+  }
+
+  public logout(): Observable<null>{
+    return this._http.post<null>(
+      `${this._identityUrl}/logout`,
+      {},
+      {
+        withCredentials: true,
+        context: new HttpContext().set(SKIP_AUTH, true)
+      }
+    ).pipe(
+      tap(() => {
+        this.clearSession();
+        this.authStatus.set(AuthStatus.Unauthenticated);
+        this.initializationCompleted = true;
+      })
+    );
   }
 
   public getAccessToken(): string | null {
@@ -34,7 +59,6 @@ export class AuthService {
   private setSession(res: TokenResponse): void {
     const session: AuthSession = {
       accessToken: res.accessToken,
-      refreshToken: res.refreshToken,
       expiresAt: Date.now() + res.expiresIn * 1000
     };
 
@@ -45,21 +69,16 @@ export class AuthService {
     this._session.set(null);
   }
 
-  refreshAccessToken(): Observable<TokenResponse> {
+  refreshAccessToken(): Observable<RefreshResponse> {
     if (this.refreshInFlight$) {
       return this.refreshInFlight$
     }
 
-    const refreshToken = this._session()?.refreshToken;
-
-    if (!refreshToken) {
-      return throwError(() => new Error("No refresh token available!"));
-    }
-
-    const request$ = this._http.post<TokenResponse>(
+    const request$ = this._http.post<RefreshResponse>(
       `${this._identityUrl}/refresh`, 
-      {refreshToken}, 
+      {}, 
       {
+        withCredentials: true,
         context: new HttpContext().set(SKIP_AUTH, true)
       }
     ).pipe(
@@ -72,7 +91,59 @@ export class AuthService {
     );
 
     this.refreshInFlight$ = request$;
+    return request$;
+  }
 
+  initializeAuth(): Observable<boolean> {
+    // case 1: initialization has been completed (return true or false)
+    if (this.initializationCompleted) {
+      return of(this.authStatus() == AuthStatus.Authenticated);
+    }
+
+    // case 2: initialization is on progress (return the same observable)
+    if (this.initializationInFlight$) {
+      return this.initializationInFlight$;
+    }
+
+    // case 3: making the first initialization attempt
+    this.authStatus.set(AuthStatus.Initializing);
+
+    const request$ = this.refreshAccessToken()
+    .pipe(
+      tap((response) => {
+        this._session.update(value => (
+          {
+            ...value,
+            ...{
+              accessToken: response.accessToken,
+              expiresAt: Date.now() + response.expiresIn * 1000
+            }
+          }
+        ));
+        this.authStatus.set(AuthStatus.Authenticated);
+      }),
+
+      map(() => true),
+
+      catchError((error) => {
+        console.log(error);
+        this.clearSession();
+        this.authStatus.set(AuthStatus.Unauthenticated);
+        return of(false);
+      }),
+
+      finalize(() => {
+        this.initializationCompleted = true;
+        this.initializationInFlight$ = null;
+      }),
+
+      shareReplay({
+        bufferSize: 1,
+        refCount: false
+      })
+    );
+
+    this.initializationInFlight$ = request$;
     return request$;
   }
 }

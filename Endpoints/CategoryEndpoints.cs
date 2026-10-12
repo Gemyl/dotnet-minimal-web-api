@@ -12,11 +12,11 @@ public static class CategoryEndpoints
     {
         var group = routes.MapGroup("/api/categories");
 
-        group.MapGet("/", GetAllCagories);
-        group.MapGet("/{id:Guid}", GetCategoryById);
-        group.MapPost("/", CreateCategory).AddEndpointFilter<ValidationFilter<CreateCategoryDto>>();
-        group.MapPut("/", UpdateCategory).AddEndpointFilter<ValidationFilter<UpdateCategoryDto>>();
-        group.MapDelete("/{id:Guid}", DeleteCategory);
+        group.MapGet("/", GetAllCagories).RequireAuthorization();
+        group.MapGet("/{id:Guid}", GetCategoryById).RequireAuthorization();
+        group.MapPost("/", CreateCategory).AddEndpointFilter<ValidationFilter<CreateCategoryDto>>().RequireAuthorization();
+        group.MapPut("/", UpdateCategory).AddEndpointFilter<ValidationFilter<UpdateCategoryDto>>().RequireAuthorization();
+        group.MapDelete("/{id:Guid}", DeleteCategory).RequireAuthorization();
     }
 
     private static async Task<IResult> GetAllCagories(AppDbContext db, IDistributedCache cache)

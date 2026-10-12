@@ -6,14 +6,23 @@ export interface LoginRequest {
 }
 
 export interface TokenResponse {
-    tokenType: string,
     accessToken: string,
     expiresIn: number,
-    refreshToken: string
 }
 
 export interface AuthSession {
     accessToken: string,
-    refreshToken: string,
     expiresAt: number
+}
+
+export interface RefreshResponse {
+    accessToken: string,
+    expiresIn: number
+}
+
+export enum AuthStatus {
+    Pending = "Pending",
+    Initializing = "Initializing",
+    Authenticated = "Authenticated",
+    Unauthenticated = "Unauthenticated"
 }

@@ -1,16 +1,22 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../../../core/services/auth-service';
 
 @Component({
   selector: 'app-navbar',
   imports: [],
-  providers: [Router],
+  providers: [Router, AuthService],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
 
 export class Navbar {
   protected router = inject(Router);
+  protected authService = inject(AuthService);
 
-  logout() {}
+  logout() {
+    this.authService.logout().subscribe(() => {
+      this.router.navigate(["/login"]);
+    });
+  }
 }

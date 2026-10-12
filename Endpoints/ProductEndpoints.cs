@@ -14,11 +14,11 @@ public static class ProductEndpoints
     {
         var group = routes.MapGroup("/api/products");
 
-        group.MapGet("/", GetAllProducts);
-        group.MapGet("/{id:Guid}", GetProductById);
-        group.MapPost("/", CreateProduct).AddEndpointFilter<ValidationFilter<CreateProductDto>>();
-        group.MapPut("/", UpdateProduct);
-        group.MapDelete("/{id:Guid}", DeleteProduct);
+        group.MapGet("/", GetAllProducts).RequireAuthorization();
+        group.MapGet("/{id:Guid}", GetProductById).RequireAuthorization();
+        group.MapPost("/", CreateProduct).AddEndpointFilter<ValidationFilter<CreateProductDto>>().RequireAuthorization();
+        group.MapPut("/", UpdateProduct).AddEndpointFilter<ValidationFilter<UpdateCategoryDto>>().RequireAuthorization();
+        group.MapDelete("/{id:Guid}", DeleteProduct).RequireAuthorization();
     }
 
     private static async Task<IResult> GetAllProducts(AppDbContext db, IDistributedCache cache)
