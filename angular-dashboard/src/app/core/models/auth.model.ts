@@ -5,6 +5,13 @@ export interface LoginRequest {
     twoFactorRecoverCode?: string
 }
 
+export interface SignupRequest {
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+}
+
 export interface TokenResponse {
     accessToken: string,
     expiresIn: number,

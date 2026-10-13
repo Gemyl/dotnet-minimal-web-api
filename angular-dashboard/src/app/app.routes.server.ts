@@ -16,5 +16,9 @@ export const serverRoutes: ServerRoute[] = [
   {
     path: 'login',
     renderMode: RenderMode.Server
+  },
+  {
+    path: 'signup',
+    renderMode: RenderMode.Server
   }
 ];

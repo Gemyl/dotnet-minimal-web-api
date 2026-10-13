@@ -26,5 +26,9 @@ export const routes: Routes = [
     {
         path: 'login',
         loadComponent: () => import('./core/components/auth/login/login').then((c) => c.Login)
+    },
+    {
+        path: 'signup',
+        loadComponent: () => import('./core/components/auth/signup/signup').then((c) => c.Signup)
     }
 ];

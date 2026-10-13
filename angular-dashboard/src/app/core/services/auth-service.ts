@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { AuthSession, LoginRequest, TokenResponse, AuthStatus, RefreshResponse } from '../models/auth.model';
+import { AuthSession, LoginRequest, TokenResponse, AuthStatus, RefreshResponse, SignupRequest } from '../models/auth.model';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { catchError, finalize, map, Observable, of, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
@@ -17,6 +17,16 @@ export class AuthService {
   private authStatus = signal<AuthStatus>(AuthStatus.Pending);
   private initializationInFlight$: Observable<boolean> | null = null;
   private initializationCompleted: boolean = false;
+
+  public signup(req: SignupRequest): Observable<any> {
+    return this._http.post(
+      `${this._identityUrl}/register-user`,
+      req,
+      {
+        context: new HttpContext().set(SKIP_AUTH, false)
+      }
+    );
+  }
 
   public login(req: LoginRequest): Observable<TokenResponse>{
     return this._http.post<TokenResponse>(

@@ -20,7 +20,7 @@ export class Login {
     required(f.password);
   });
   private _authService = inject(AuthService);
-  private readonly _router = inject(Router);
+  protected readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
 
   login(): void {
