@@ -3,6 +3,7 @@ import { form, FormField, required } from '@angular/forms/signals';
 import { AuthService } from '../../../services/auth-service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormWrapper } from '../../generic/wrappers/form-wrapper/form-wrapper';
+import { ROUTES } from '../../../../app.routes';
 
 @Component({
   selector: 'app-login',
@@ -23,6 +24,7 @@ export class Login {
   private _authService = inject(AuthService);
   protected readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
+  protected readonly _routes = ROUTES;
 
   login(): void {
     this._authService.login(this.loginModel())
@@ -36,7 +38,7 @@ export class Login {
             !returnUrl.startsWith("//") &&
             !returnUrl.startsWith("/\\")
               ? returnUrl
-              : "/products";
+              : this._routes.PRODUCTS;
                
           this._router.navigate([target]);
 

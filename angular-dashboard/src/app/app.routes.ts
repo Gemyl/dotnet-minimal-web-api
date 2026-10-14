@@ -5,7 +5,7 @@ import { AuthGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
     {
-        path: '',
+        path: 'dashboard',
         component: Main,
         canActivate: [AuthGuard],
         children: [
@@ -39,3 +39,10 @@ export const routes: Routes = [
         ]
     }
 ];
+
+export enum ROUTES {
+    PRODUCTS = "/dashboard/products",
+    CATEGORIES = "/dashboard/categories",
+    LOGIN = "/auth/login",
+    SIGNUP = "/auth/signup"
+}

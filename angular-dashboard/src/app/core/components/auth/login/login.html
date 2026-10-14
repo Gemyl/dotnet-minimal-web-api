@@ -6,6 +6,6 @@
     disabled:cursor-not-allowed"
     [disabled]="loginForm().invalid()">Submit</button>
     <span class="font-semibold mt-5">Don't have an account? 
-        <span class="text-purple-600 cursor-pointer" (click)="_router.navigate(['/auth/signup'])">Sign Up.</span>
+        <span class="text-purple-600 cursor-pointer" (click)="_router.navigate([_routes.SIGNUP])">Sign Up.</span>
     </span>
 </app-form-wrapper>
