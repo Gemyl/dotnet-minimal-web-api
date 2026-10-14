@@ -4,6 +4,7 @@ import { HttpClient, HttpContext } from '@angular/common/http';
 import { catchError, finalize, map, Observable, of, shareReplay, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { SKIP_AUTH } from '../helpers/auth.tokens';
+import { ToastService } from './toast-service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class AuthService {
   private authStatus = signal<AuthStatus>(AuthStatus.Pending);
   private initializationInFlight$: Observable<boolean> | null = null;
   private initializationCompleted: boolean = false;
+  private readonly _toasts = inject(ToastService);
 
   public signup(req: SignupRequest): Observable<any> {
     return this._http.post(
@@ -126,8 +128,8 @@ export class AuthService {
 
       map(() => true),
 
-      catchError((error) => {
-        console.log(error);
+      catchError(() => {
+        this._toasts.error("Failed to refresh session.");
         this.clearSession();
         this.authStatus.set(AuthStatus.Unauthenticated);
         return of(false);

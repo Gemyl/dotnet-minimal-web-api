@@ -4,6 +4,16 @@
     <input type="password" placeholder="Enter password" [formField]="signupForm.password" class="w-[65%] border border-gray-400 mt-2 px-2 py-1">
     <input type="text" placeholder="Enter name (optional)" [formField]="signupForm.firstName" class="w-[65%] border border-gray-400 mt-2 px-2 py-1">
     <input type="text" placeholder="Enter last name (optional)" [formField]="signupForm.lastName" class="w-[65%] border border-gray-400 mt-2 px-2 py-1">
+    @if (errors().length > 0) {
+        <div class="flex flex-col justify-center items-start bg-red-200 border border-red-400 p-2 mt-4 w-[65%] rounded-md">
+            @for (error of errors(); track error) {
+                <span class="flex flex-row items-start text-red-500">
+                    <i class="fa fa-circle text-red-500 text-[.3em] mr-1 mt-[1.7em] shrink-0"></i>
+                    <span>{{error}}</span>
+                </span>
+            }
+        </div>
+    }
     <button type="submit" (click)="handleSignup()" class="w-[65%] bg-blue-600 text-white rounded-full mt-4 py-1 cursor-pointer  disabled:bg-gray-300 disabled:text-gray-500
     disabled:cursor-not-allowed" [disabled]="signupForm().invalid()">Submit</button>
 </app-form-wrapper>

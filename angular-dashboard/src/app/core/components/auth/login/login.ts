@@ -4,6 +4,7 @@ import { AuthService } from '../../../services/auth-service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormWrapper } from '../../generic/wrappers/form-wrapper/form-wrapper';
 import { ROUTES } from '../../../../app.routes';
+import { ToastService } from '../../../services/toast-service';
 
 @Component({
   selector: 'app-login',
@@ -25,6 +26,7 @@ export class Login {
   protected readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
   protected readonly _routes = ROUTES;
+  protected readonly _toasts = inject(ToastService);
 
   login(): void {
     this._authService.login(this.loginModel())
@@ -47,7 +49,11 @@ export class Login {
         }
       },
       error: (err) => {
-        console.error("Login Failed", err);
+        if (err.status == 401) {
+          this._toasts.error("Invalid credentials.")
+        } else {
+          this._toasts.error("An unknown error occured. Please, try again later.", 5000)
+        }
       }
     })
   } 
