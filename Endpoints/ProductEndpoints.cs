@@ -17,7 +17,7 @@ public static class ProductEndpoints
         group.MapGet("/", GetAllProducts).RequireAuthorization();
         group.MapGet("/{id:Guid}", GetProductById).RequireAuthorization();
         group.MapPost("/", CreateProduct).AddEndpointFilter<ValidationFilter<CreateProductDto>>().RequireAuthorization();
-        group.MapPut("/", UpdateProduct).AddEndpointFilter<ValidationFilter<UpdateCategoryDto>>().RequireAuthorization();
+        group.MapPut("/", UpdateProduct).AddEndpointFilter<ValidationFilter<UpdateProductDto>>().RequireAuthorization();
         group.MapDelete("/{id:Guid}", DeleteProduct).RequireAuthorization();
     }
 
