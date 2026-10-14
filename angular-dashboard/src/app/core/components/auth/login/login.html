@@ -1,13 +1,11 @@
-<div class="flex flex-col justify-center items-center w-full h-screen bg-linear-to-br from-white to-blue-200">
-    <div class="flex flex-col justify-center items-center border border-gray-300 rounded-md shadow-xl w-[40%] min-w-24 px-4 py-4 bg-white">
-        <span class="font-bold text-3xl mb-5">Login</span>
-        <input type="email" placeholder="Enter email" [formField]="loginForm.email" class="w-[65%] border border-gray-400 px-2 py-1">
-        <input type="password" placeholder="Enter password" [formField]="loginForm.password" class="w-[65%] border border-gray-400 mt-2 px-2 py-1">
-        <button type="submit" (click)="login()" class="w-[65%] bg-blue-600 text-white rounded-full mt-4 py-1 cursor-pointer  disabled:bg-gray-300 disabled:text-gray-500
-        disabled:cursor-not-allowed"
-        [disabled]="loginForm().invalid()">Submit</button>
-        <span class="font-semibold mt-5">Don't have an account? 
-            <span class="text-purple-600 cursor-pointer" (click)="_router.navigate(['/signup'])">Sign Up.</span>
-        </span>
-    </div>
-</div>
+<app-form-wrapper>
+    <span class="font-bold text-3xl mb-5">Login</span>
+    <input type="email" placeholder="Enter email" [formField]="loginForm.email" class="w-[65%] border border-gray-400 px-2 py-1">
+    <input type="password" placeholder="Enter password" [formField]="loginForm.password" class="w-[65%] border border-gray-400 mt-2 px-2 py-1">
+    <button type="submit" (click)="login()" class="w-[65%] bg-blue-600 text-white rounded-full mt-4 py-1 cursor-pointer  disabled:bg-gray-300 disabled:text-gray-500
+    disabled:cursor-not-allowed"
+    [disabled]="loginForm().invalid()">Submit</button>
+    <span class="font-semibold mt-5">Don't have an account? 
+        <span class="text-purple-600 cursor-pointer" (click)="_router.navigate(['/auth/signup'])">Sign Up.</span>
+    </span>
+</app-form-wrapper>

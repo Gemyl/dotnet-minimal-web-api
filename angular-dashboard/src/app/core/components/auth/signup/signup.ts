@@ -3,10 +3,11 @@ import { SignupRequest } from '../../../models/auth.model';
 import { form, required, FormField } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth-service';
+import { FormWrapper } from '../../generic/wrappers/form-wrapper/form-wrapper';
 
 @Component({
   selector: 'app-signup',
-  imports: [FormField],
+  imports: [FormField, FormWrapper],
   templateUrl: './signup.html',
   styleUrl: './signup.css',
 })
@@ -29,7 +30,7 @@ export class Signup {
     .subscribe(
       (response) => {
         console.log(response);
-        this._router.navigate(["/login"]);
+        this._router.navigate(["/auth/login"]);
       }
     )
   }

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Main } from './features/layouts/main/main';
+import { Auth } from './core/layouts/auth/auth';
 import { AuthGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
@@ -24,11 +25,17 @@ export const routes: Routes = [
         ]
     },
     {
-        path: 'login',
-        loadComponent: () => import('./core/components/auth/login/login').then((c) => c.Login)
-    },
-    {
-        path: 'signup',
-        loadComponent: () => import('./core/components/auth/signup/signup').then((c) => c.Signup)
+        path: 'auth',
+        component: Auth,
+        children: [
+            {
+                path: 'login',
+                loadComponent: () => import('./core/components/auth/login/login').then((c) => c.Login)
+            },
+            {
+                path: 'signup',
+                loadComponent: () => import('./core/components/auth/signup/signup').then((c) => c.Signup)
+            }
+        ]
     }
 ];

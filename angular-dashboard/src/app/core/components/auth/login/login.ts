@@ -2,10 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { AuthService } from '../../../services/auth-service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { FormWrapper } from '../../generic/wrappers/form-wrapper/form-wrapper';
 
 @Component({
   selector: 'app-login',
-  imports: [FormField],
+  imports: [FormField, FormWrapper],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

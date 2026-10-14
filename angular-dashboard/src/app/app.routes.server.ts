@@ -14,11 +14,15 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server
   },
   {
-    path: 'login',
+    path: 'auth',
+    renderMode: RenderMode.Server,
+  },
+  {
+    path: 'auth/login',
     renderMode: RenderMode.Server
   },
   {
-    path: 'signup',
+    path: 'auth/signup',
     renderMode: RenderMode.Server
   }
 ];
