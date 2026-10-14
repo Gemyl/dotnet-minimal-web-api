@@ -24,7 +24,7 @@ public static class ProductEndpoints
     private static async Task<IResult> GetAllProducts(AppDbContext db, IDistributedCache cache)
     {
         string cacheKey = "products_all";
-        var cachedData = await cache.GetRecordAsync<List<Product>>(cacheKey);
+        var cachedData = await cache.GetRecordAsync<List<ProductDto>>(cacheKey);
 
         if (cachedData is not null)
         {
@@ -44,7 +44,7 @@ public static class ProductEndpoints
     private static async Task<IResult> GetProductById(Guid id, AppDbContext db, IDistributedCache cache)
     {
         string cacheKey = $"{id}";
-        var cachedData = await cache.GetRecordAsync<Product>(cacheKey);
+        var cachedData = await cache.GetRecordAsync<ProductDto>(cacheKey);
 
         if (cachedData is not null)
         {

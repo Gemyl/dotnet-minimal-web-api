@@ -22,7 +22,7 @@ public static class CategoryEndpoints
     private static async Task<IResult> GetAllCagories(AppDbContext db, IDistributedCache cache)
     {
         string cacheKey = "categories_all";
-        var cachedData = await cache.GetRecordAsync<List<Category>>(cacheKey);
+        var cachedData = await cache.GetRecordAsync<List<CategoryDto>>(cacheKey);
 
         if (cachedData is not null)
         {
@@ -42,7 +42,7 @@ public static class CategoryEndpoints
     private static async Task<IResult> GetCategoryById(AppDbContext db, Guid id, IDistributedCache cache)
     {
         string cacheKey = $"{id}";
-        var cachedData = await cache.GetRecordAsync<Category>(cacheKey);
+        var cachedData = await cache.GetRecordAsync<CategoryDto>(cacheKey);
 
         if (cachedData is not null)
         {
