@@ -7,3 +7,11 @@ export interface CreateProduct {
 export interface Product extends CreateProduct {
     id: string
 }
+
+export interface ProductsPagedResponse {
+    items: Product[],
+    page: number,
+    pageSize: number,
+    totalItems: number,
+    totalPages: number
+}

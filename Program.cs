@@ -5,6 +5,8 @@ using MyWebApi.Endpoints;
 using MyWebApi.Handlers;
 using MyWebApi.Middleware;
 using MyWebApi.Models;
+using MyWebApi.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +21,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    options.InstanceName = "MyApiCache_";
+    options.InstanceName = "redis_";
 });
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(options =>
+    ConnectionMultiplexer.Connect(
+        builder.Configuration.GetConnectionString("Redis")!
+    )
+);
+builder.Services.AddSingleton<CacheService>();
 
 // 3. Validation & Exception Handling
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

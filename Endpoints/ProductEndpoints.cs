@@ -4,8 +4,8 @@ using MyWebApi.Models;
 using MyWebApi.DTOs;
 using MyWebApi.Filters;
 using MyWebApi.Extensions;
+using MyWebApi.Services;
 using Microsoft.Extensions.Caching.Distributed;
-
 namespace MyWebApi.Endpoints;
 
 public static class ProductEndpoints
@@ -21,27 +21,57 @@ public static class ProductEndpoints
         group.MapDelete("/{id:Guid}", DeleteProduct).RequireAuthorization();
     }
 
-    private static async Task<IResult> GetAllProducts(AppDbContext db, IDistributedCache cache)
+    private static async Task<IResult> GetAllProducts(
+        AppDbContext db, 
+        IDistributedCache cache, 
+        int page, 
+        int pageSize
+    )
     {
-        string cacheKey = "products_all";
-        var cachedData = await cache.GetRecordAsync<List<ProductDto>>(cacheKey);
 
-        if (cachedData is not null)
+        string cacheKey = $"products:page-{page}:size-{pageSize}";
+        var cachedResponse = await cache.GetRecordAsync<PagedResponseDto<ProductDto>>(cacheKey);
+
+        if (cachedResponse is not null)
         {
-            return Results.Ok(cachedData);
+            return Results.Ok(cachedResponse);
         }
 
-        var products = await db.Products
+        var query = db.Products
         .AsNoTracking()
-        .Select(p => new ProductDto(p.Id, p.Name, p.Price, p.CategoryId))
+        .OrderBy(p => p.Id);
+
+        var totalItems = await query.CountAsync();
+
+        var products = await query
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .Select(p => new ProductDto(
+            p.Id, 
+            p.Name, 
+            p.Price, 
+            p.CategoryId
+        ))
         .ToListAsync();
+        
+        var response = new PagedResponseDto<ProductDto>
+        {
+            Items = products,
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = totalItems
+        };
 
-        await cache.SetRecordAsync(cacheKey, products, null);
-
-        return Results.Ok(products);
+        await cache.SetRecordAsync(cacheKey, response, null);
+        
+        return Results.Ok(response);
     }
 
-    private static async Task<IResult> GetProductById(Guid id, AppDbContext db, IDistributedCache cache)
+    private static async Task<IResult> GetProductById(
+        Guid id, 
+        AppDbContext db, 
+        IDistributedCache cache
+    )
     {
         string cacheKey = $"{id}";
         var cachedData = await cache.GetRecordAsync<ProductDto>(cacheKey);
@@ -56,13 +86,23 @@ public static class ProductEndpoints
         if (product is not null)
         {
             await cache.SetRecordAsync(cacheKey, product);
-            return Results.Ok(new ProductDto(product.Id, product.Name, product.Price, product.CategoryId));
+            return Results.Ok(new ProductDto(
+                product.Id, 
+                product.Name, 
+                product.Price, 
+                product.CategoryId
+            ));
         }
 
         return Results.NotFound();
     }
 
-    private static async Task<IResult> CreateProduct(CreateProductDto newProduct, AppDbContext db, IDistributedCache cache)
+    private static async Task<IResult> CreateProduct(
+        CreateProductDto newProduct, 
+        AppDbContext db, 
+        IDistributedCache cache,
+        CacheService cacheService
+    )
     {
         var product = new Product
         {
@@ -74,13 +114,23 @@ public static class ProductEndpoints
 
         db.Products.Add(product);
         await db.SaveChangesAsync();
-        await cache.RemoveAsync("products_all");
+        await cacheService.RemoveKeyByPatternAsync("redis_products:*");
 
-        var responseDto = new ProductDto(product.Id, product.Name, product.Price, product.CategoryId);
+        var responseDto = new ProductDto(
+            product.Id, 
+            product.Name, 
+            product.Price, 
+            product.CategoryId
+        );
         return Results.Ok(responseDto);
     }
 
-    private static async Task<IResult> UpdateProduct(Product product, AppDbContext db, IDistributedCache cache)
+    private static async Task<IResult> UpdateProduct(
+        Product product, 
+        AppDbContext db, 
+        IDistributedCache cache,
+        CacheService cacheService
+    )
     {
         var selectedProduct = await db.Products.FindAsync(product.Id);
         if (selectedProduct == null) return Results.NotFound();
@@ -91,13 +141,23 @@ public static class ProductEndpoints
 
         await db.SaveChangesAsync();
         await cache.RemoveAsync(product.Id.ToString());
-        await cache.RemoveAsync("products_all");
+        await cacheService.RemoveKeyByPatternAsync("redis_products:*");
 
-        var responseDto = new ProductDto(selectedProduct.Id, selectedProduct.Name, selectedProduct.Price, selectedProduct.CategoryId);
+        var responseDto = new ProductDto(
+            selectedProduct.Id, 
+            selectedProduct.Name, 
+            selectedProduct.Price, 
+            selectedProduct.CategoryId
+        );
         return Results.Ok(responseDto);
     }
 
-    private static async Task<IResult> DeleteProduct(Guid id, AppDbContext db, IDistributedCache cache)
+    private static async Task<IResult> DeleteProduct(
+        Guid id, 
+        AppDbContext db, 
+        IDistributedCache cache,
+        CacheService cacheService
+    )
     {
         var product = await db.Products.FindAsync(id);
         if (product is null) return Results.Ok();
@@ -105,7 +165,7 @@ public static class ProductEndpoints
         db.Products.Remove(product);
         await db.SaveChangesAsync();
         await cache.RemoveAsync(id.ToString());
-        await cache.RemoveAsync("products_all");
+        await cacheService.RemoveKeyByPatternAsync("redis_products:*");
 
         return Results.Ok(product.Id);
     }

@@ -1,7 +1,7 @@
 import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateProduct, Product } from '../../../features/models/products.model';
+import { CreateProduct, Product, ProductsPagedResponse } from '../../../features/models/products.model';
 import { httpResource } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -11,16 +11,15 @@ import { isPlatformBrowser } from '@angular/common';
 
 export class ProductsService {
   private _http = inject(HttpClient);
-  public query = signal({value: ''});
+  public query = signal({value: '', page: 1, pageSize: 10});
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
-
-  productsResource = httpResource<Product[]>(() => {
+  productsResource = httpResource<ProductsPagedResponse>(() => {
     if (!this.isBrowser) return undefined;
-    return `http://localhost:5000/api/products/${this.query().value}`
+    return `http://localhost:5000/api/products${this.query().value}?page=${this.query().page}&pageSize=${this.query().pageSize}`
   }, {
-    defaultValue: undefined
+    defaultValue: undefined,
   });
 
   public createProduct(payload: CreateProduct): Observable<Product> {

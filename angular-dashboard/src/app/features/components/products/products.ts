@@ -36,8 +36,8 @@ export class Products {
   protected products = computed(() => {
     if (this._productsService.productsResource.hasValue()) {
       let products: any = [];
-      
-      this._productsService.productsResource.value().forEach((product: Product) => {
+
+      this._productsService.productsResource.value()?.items.forEach((product: Product) => {
         product = {
           ...product,
           ...{
@@ -57,16 +57,24 @@ export class Products {
   public onFormSubmit() {
     this._productsService.createProduct(this.createProductModel()).subscribe((response) => {
       if (response.id) {
-        console.log(`Product created with ID ${response.id}`);
-        this._productsService.query.set({ value: '' });
+        this._productsService.query.update((value) => ({
+          ...value,
+          ...{
+            value: ''
+          }
+        }));
       }
     });
   }
 
   protected deleteProduct(id: string) {
     this._productsService.deleteProduct(id).subscribe((response) => {
-      console.log(`Product with ID ${response} successfully deleted`);
-      this._productsService.query.set({ value: '' });
+        this._productsService.query.update((value) => ({
+          ...value,
+          ...{
+            value: ''
+          }
+        }));
     });
   }
 
@@ -76,9 +84,13 @@ export class Products {
 
   protected saveChanges() {
     this._productsService.updateProduct(this.editProductModel()).subscribe((response: Product) => {
-      console.log(response);
       this.cancelEdit();
-      this._productsService.query.set({ value: '' });
+        this._productsService.query.update((value) => ({
+          ...value,
+          ...{
+            value: ''
+          }
+        }));
     });
   }
 
@@ -97,6 +109,24 @@ export class Products {
 
   onItemLeave() {
     this.hoveredItemIndex.set(-1);
+  }
+
+  onPageChange(page: number): void {
+    this._productsService.query.update((value) => ({
+      ...value,
+      ...{
+        page: page
+      }
+    }));
+  }
+
+  onPageSizeChange(event: any): void {
+    this._productsService.query.update((value) => ({
+      ...value,
+      ...{
+        pageSize: Number(event.target.value)
+      }
+    }));
   }
 
 }
