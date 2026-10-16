@@ -5,7 +5,7 @@
             <input type="number" placeholder="Enter price" [formField]="createProductForm.price" class="border border-black p-1 rounded-md w-full"/>
             <select class="border border-black p-1 rounded-md w-full" [style.color]="createProductModel().categoryId == '' ? 'gray' : 'black'" [formField]="createProductForm.categoryId">
                 <option [value]="''" disabled selected hidden>Select category</option>
-                @for (item of _categoriesService.categoriesResource.value(); track item.id) {
+                @for (item of _categoriesService.categoriesResource.value()?.items; track item.id) {
                     <option [value]="item.id">{{item.name}}</option>
                 }
             </select>
@@ -47,7 +47,7 @@
                                 <input type="text" [formField]="editProductForm.name" class="border border-black rounded-full px-2 py-1 w-1/3"/>
                                 <input type="number" [formField]="editProductForm.price" class="border border-black rounded-full px-2 py-1 w-1/3 ml-2"/>
                                 <select class="border border-black rounded-full px-2 py-1 w-1/3 ml-2" [formField]="editProductForm.categoryId">
-                                    @for(category of _categoriesService.categoriesResource.value(); track category.id) {
+                                    @for(category of _categoriesService.categoriesResource.value()?.items; track category.id) {
                                         <option [value]="category.id">{{category.name}}</option>
                                     }
                                 </select>

@@ -46,6 +46,30 @@
                         </div>
                     </div>
                 }
+                <div class="flex flex-row justify-between items-center w-full mt-2 px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 shadow-md text-gray-600">
+                    <div class="flex items-center gap-2">
+                        <label for="category-page-size" class="text-sm">Rows per page</label>
+                        <select id="category-page-size" class="border border-gray-300 rounded-md bg-white px-2 py-1 text-sm"
+                            [value]="_categoriesService.query().pageSize"
+                            (change)="onPageSizeChange($event)">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <span>{{_categoriesService.categoriesResource.value().totalItems}} Items</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm">Page {{_categoriesService.query().page}} of {{_categoriesService.categoriesResource.value().totalPages}}</span>
+                        <button type="button" aria-label="Previous page"
+                            class="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                            [disabled]="_categoriesService.query().page <= 1"
+                            (click)="onPageChange(_categoriesService.query().page - 1)">‹</button>
+                        <button type="button" aria-label="Next page"
+                            class="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-200"
+                            (click)="onPageChange(_categoriesService.query().page + 1)">›</button>
+                    </div>
+                </div>
             } @else {
                 <p>No categories in the list</p>
             }

@@ -23,7 +23,7 @@ export class Categories {
   protected hoveredItemIndex = signal(-1);
   protected categories = computed(() => {
     if (this._categoriesService.categoriesResource.hasValue()) {
-      return this._categoriesService.categoriesResource.value();
+      return this._categoriesService.categoriesResource.value().items;
     } else {
       return []
     };
@@ -33,16 +33,20 @@ export class Categories {
     this._categoriesService.createCategory(this.createCategoryModel())
     .subscribe((response: string) => {
       if (response) {
-        console.log(`Category with ID ${response} created.`);
-        this._categoriesService.query.set({value: ''});
+        this._categoriesService.query.update((value) => ({
+          ...value,
+          ...{value: ''}
+        }));
       }
     });
   }
 
   protected deleteCategory(id: string) {
-    this._categoriesService.deleteCategory(id).subscribe((response) => {
-      console.log(`Product with ID ${response} successfully deleted`);
-      this._categoriesService.query.set({value: ''});
+    this._categoriesService.deleteCategory(id).subscribe(() => {
+        this._categoriesService.query.update((value) => ({
+          ...value,
+          ...{value: ''}
+        }));
     });
   }
 
@@ -53,9 +57,13 @@ export class Categories {
   protected saveChanges() {
     this._categoriesService.updateCategory(this.editCategoryModel())
     .subscribe((response: string) => {
-      console.log(response);
-      this.cancelEdit();
-      this._categoriesService.query.set({value: ''});
+      if (response) {
+        this.cancelEdit();
+        this._categoriesService.query.update((value) => ({
+          ...value,
+          ...{value: ''}
+        }));
+      }
     });
   }
 
@@ -72,5 +80,19 @@ export class Categories {
 
   onItemLeave() {
     this.hoveredItemIndex.set(-1);
+  }
+
+  onPageChange(page: number): void {
+    this._categoriesService.query.update((value) => ({
+      ...value,
+      ...{ page }
+    }));
+  }
+
+  onPageSizeChange(event: any): void {
+    this._categoriesService.query.update((value) => ({
+      ...value,
+      ...{ pageSize: Number(event.target.value) }
+    }));
   }
 }

@@ -5,6 +5,7 @@ using MyWebApi.Filters;
 using MyWebApi.Models;
 using MyWebApi.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
+using MyWebApi.Services;
 
 public static class CategoryEndpoints
 {
@@ -19,27 +20,54 @@ public static class CategoryEndpoints
         group.MapDelete("/{id:Guid}", DeleteCategory).RequireAuthorization();
     }
 
-    private static async Task<IResult> GetAllCagories(AppDbContext db, IDistributedCache cache)
+    private static async Task<IResult> GetAllCagories(
+        AppDbContext db, 
+        IDistributedCache cache,
+        int page,
+        int pageSize
+    )
     {
-        string cacheKey = "categories_all";
-        var cachedData = await cache.GetRecordAsync<List<CategoryDto>>(cacheKey);
+        string cacheKey = $"categories:page-{page}:size-{pageSize}";
+        var cachedResponse = await cache.GetRecordAsync<PagedResponseDto<CategoryDto>>(cacheKey);
 
-        if (cachedData is not null)
+        if (cachedResponse is not null)
         {
-            return Results.Ok(cachedData);
+            return Results.Ok(cachedResponse);
         }
 
-        var categories = await db.Categories
+        var query = db.Categories
         .AsNoTracking()
-        .Select(c => new CategoryDto(c.Id, c.Name, c.Products.Select(p => new CategoryProductsDto(p.Id, p.Name, p.Price)).ToList()))
+        .OrderBy(p => p.Id);
+
+        var totalItems = await query.CountAsync();
+
+        var categories = await query
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .Select(c => new CategoryDto(
+            c.Id, 
+            c.Name
+        ))
         .ToListAsync();
 
-        await cache.SetRecordAsync(cacheKey, categories);
+        var response = new PagedResponseDto<CategoryDto>
+        {
+            Items = categories,
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = totalItems,
+        };
 
-        return Results.Ok(categories);
+        await cache.SetRecordAsync(cacheKey, response);
+
+        return Results.Ok(response);
     }
 
-    private static async Task<IResult> GetCategoryById(AppDbContext db, Guid id, IDistributedCache cache)
+    private static async Task<IResult> GetCategoryById(
+        AppDbContext db, 
+        Guid id, 
+        IDistributedCache cache
+    )
     {
         string cacheKey = $"{id}";
         var cachedData = await cache.GetRecordAsync<CategoryDto>(cacheKey);
@@ -52,7 +80,10 @@ public static class CategoryEndpoints
         var dto = await db.Categories
             .AsNoTracking()
             .Where(c => c.Id == id)
-            .Select(c => new CategoryDto(c.Id, c.Name, c.Products.Select(p => new CategoryProductsDto(p.Id, p.Name, p.Price)).ToList()))
+            .Select(c => new CategoryDto(
+                c.Id, 
+                c.Name
+            ))
             .FirstOrDefaultAsync();
 
         if (dto is not null) return Results.NotFound();
@@ -62,7 +93,12 @@ public static class CategoryEndpoints
         return Results.Ok(dto);
     }
 
-    private static async Task<IResult> CreateCategory(AppDbContext db, CreateCategoryDto dto, IDistributedCache cache)
+    private static async Task<IResult> CreateCategory(
+        AppDbContext db, 
+        CreateCategoryDto dto, 
+        IDistributedCache cache,
+        CacheService cacheService
+    )
     {
         var newCategory = new Category
         {
@@ -72,12 +108,17 @@ public static class CategoryEndpoints
 
         db.Categories.Add(newCategory);
         await db.SaveChangesAsync();
-        await cache.RemoveAsync("categories_all");
+        await cacheService.RemoveKeyByPatternAsync("redis_categories:*");
 
         return Results.Ok(newCategory.Id);
     }
 
-    private static async Task<IResult> UpdateCategory(AppDbContext db, UpdateCategoryDto dto, IDistributedCache cache)
+    private static async Task<IResult> UpdateCategory(
+        AppDbContext db, 
+        UpdateCategoryDto dto, 
+        IDistributedCache cache,
+        CacheService cacheService
+    )
     {
         var category = await db.Categories.Where(c => c.Id == dto.Id).FirstOrDefaultAsync();
         if (category is null) return Results.NotFound();
@@ -86,12 +127,17 @@ public static class CategoryEndpoints
 
         await db.SaveChangesAsync();
         await cache.RemoveAsync(category.Id.ToString());
-        await cache.RemoveAsync("categories_all");
+        await cacheService.RemoveKeyByPatternAsync("redis_categories:*");
 
         return Results.Ok(category.Id);
     }
 
-    private static async Task<IResult> DeleteCategory(AppDbContext db, Guid id, IDistributedCache cache)
+    private static async Task<IResult> DeleteCategory(
+        AppDbContext db, 
+        Guid id, 
+        IDistributedCache cache,
+        CacheService cacheService
+    )
     {
         var category = await db.Categories.Where(c => c.Id == id).FirstOrDefaultAsync();
         if (category is null) return Results.NotFound();
@@ -99,7 +145,7 @@ public static class CategoryEndpoints
         db.Categories.Remove(category);
         await db.SaveChangesAsync();
         await cache.RemoveAsync(id.ToString());
-        await cache.RemoveAsync("categories_all");
+        await cacheService.RemoveKeyByPatternAsync("redis_categories:*");
 
         return Results.NoContent();
     }

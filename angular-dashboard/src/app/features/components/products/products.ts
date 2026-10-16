@@ -41,7 +41,7 @@ export class Products {
         product = {
           ...product,
           ...{
-            categoryName: this._categoriesService.categoriesResource.value()
+            categoryName: this._categoriesService.categoriesResource.value()?.items
             ?.find((category: Category) => category.id == product.categoryId)
             ?.name
           }
