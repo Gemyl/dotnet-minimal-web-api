@@ -37,7 +37,7 @@ export class Products {
     if (this._productsService.productsResource.hasValue()) {
       let products: any = [];
 
-      this._productsService.productsResource.value()?.items.forEach((product: Product) => {
+      this._productsService.productsResource.value().items.forEach((product: Product) => {
         product = {
           ...product,
           ...{
@@ -51,30 +51,29 @@ export class Products {
       })
 
       return products;
-    } else return [];
+    } else {
+      return []
+    };
   })
 
   public onFormSubmit() {
     this._productsService.createProduct(this.createProductModel()).subscribe((response) => {
       if (response.id) {
-        this._productsService.query.update((value) => ({
-          ...value,
-          ...{
-            value: ''
-          }
-        }));
+        this._productsService.query.update((value) => ({...value}));
       }
     });
   }
 
   protected deleteProduct(id: string) {
-    this._productsService.deleteProduct(id).subscribe((response) => {
+    this._productsService.deleteProduct(id).subscribe(() => {
+      if (this.products().length == 1) {
         this._productsService.query.update((value) => ({
           ...value,
-          ...{
-            value: ''
-          }
+          ...{ page: 1 }
         }));
+      } else {
+        this._productsService.query.update((value) => ({...value}));
+      }
     });
   }
 
@@ -85,12 +84,7 @@ export class Products {
   protected saveChanges() {
     this._productsService.updateProduct(this.editProductModel()).subscribe((response: Product) => {
       this.cancelEdit();
-        this._productsService.query.update((value) => ({
-          ...value,
-          ...{
-            value: ''
-          }
-        }));
+      this._productsService.query.update((value) => ({...value}));
     });
   }
 

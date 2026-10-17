@@ -12,12 +12,12 @@ export class CategoriesService {
   private _http = inject(HttpClient);
   private platoformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platoformId);
-  public query = signal({value: '', page: 1, pageSize: 10});
+  public query = signal({page: 1, pageSize: 10});
 
   categoriesResource = httpResource<CategoriesPagedResponse>(
     () => {
       if (!this.isBrowser) return undefined;
-      return `http://localhost:5000/api/categories${this.query().value}?page=${this.query().page}&pageSize=${this.query().pageSize}`
+      return `http://localhost:5000/api/categories?page=${this.query().page}&pageSize=${this.query().pageSize}`
     },{
       defaultValue: undefined
     }

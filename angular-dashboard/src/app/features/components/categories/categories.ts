@@ -33,20 +33,21 @@ export class Categories {
     this._categoriesService.createCategory(this.createCategoryModel())
     .subscribe((response: string) => {
       if (response) {
-        this._categoriesService.query.update((value) => ({
-          ...value,
-          ...{value: ''}
-        }));
+        this._categoriesService.query.update((value) => ({...value}));
       }
     });
   }
 
   protected deleteCategory(id: string) {
     this._categoriesService.deleteCategory(id).subscribe(() => {
+      if (this.categories().length == 1) {
         this._categoriesService.query.update((value) => ({
           ...value,
-          ...{value: ''}
-        }));
+          ...{page: 1}
+        }));        
+      } else {
+        this._categoriesService.query.update((value) => ({...value}));
+      }
     });
   }
 
@@ -59,10 +60,7 @@ export class Categories {
     .subscribe((response: string) => {
       if (response) {
         this.cancelEdit();
-        this._categoriesService.query.update((value) => ({
-          ...value,
-          ...{value: ''}
-        }));
+        this._categoriesService.query.update((value) => ({...value}));
       }
     });
   }

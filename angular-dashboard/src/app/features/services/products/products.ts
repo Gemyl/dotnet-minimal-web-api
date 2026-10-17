@@ -11,13 +11,13 @@ import { isPlatformBrowser } from '@angular/common';
 
 export class ProductsService {
   private _http = inject(HttpClient);
-  public query = signal({value: '', page: 1, pageSize: 10});
+  public query = signal({page: 1, pageSize: 10});
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
   productsResource = httpResource<ProductsPagedResponse>(() => {
     if (!this.isBrowser) return undefined;
-    return `http://localhost:5000/api/products${this.query().value}?page=${this.query().page}&pageSize=${this.query().pageSize}`
+    return `http://localhost:5000/api/products?page=${this.query().page}&pageSize=${this.query().pageSize}`
   }, {
     defaultValue: undefined,
   });
