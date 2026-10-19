@@ -17,7 +17,7 @@
             } @else if (categories().length > 0) {
                 <div
                     class="w-full flex flex-row justify-start items-center h-10 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 text-lg px-4 text-center align-middle">
-                    <p class="w-3/4 text-start">Title</p>
+                    <button type="button" class="w-3/4 text-start cursor-pointer hover:text-gray-800" (click)="onSortChange('name')">Title {{_categoriesService.query().sortDirection === 'asc' ? '↑' : '↓'}}</button>
                     <p class="w-1/4 text-center px-4">Actions</p>
                 </div>
                 @for(item of categories(); track item.id; let idx = $index;){

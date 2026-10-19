@@ -25,11 +25,15 @@ public static class ProductEndpoints
         AppDbContext db, 
         IDistributedCache cache, 
         int page, 
-        int pageSize
+        int pageSize,
+        string sortBy = "name",
+        string sortDirection = "asc"
     )
     {
 
-        string cacheKey = $"products:page-{page}:size-{pageSize}";
+        var descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+        var normalizedSortBy = sortBy.ToLowerInvariant();
+        string cacheKey = $"products:page-{page}:size-{pageSize}:sort-{normalizedSortBy}-{(descending ? "desc" : "asc")}";
         var cachedResponse = await cache.GetRecordAsync<PagedResponseDto<ProductDto>>(cacheKey);
 
         if (cachedResponse is not null)
@@ -37,9 +41,16 @@ public static class ProductEndpoints
             return Results.Ok(cachedResponse);
         }
 
-        var query = db.Products
-        .AsNoTracking()
-        .OrderBy(p => p.Id);
+        var productsQuery = db.Products.AsNoTracking();
+        var query = (normalizedSortBy, descending) switch
+        {
+            ("price", false) => productsQuery.OrderBy(p => p.Price).ThenBy(p => p.Id),
+            ("price", true) => productsQuery.OrderByDescending(p => p.Price).ThenBy(p => p.Id),
+            ("category", false) => productsQuery.OrderBy(p => p.Category.Name).ThenBy(p => p.Id),
+            ("category", true) => productsQuery.OrderByDescending(p => p.Category.Name).ThenBy(p => p.Id),
+            (_, true) => productsQuery.OrderByDescending(p => p.Name).ThenBy(p => p.Id),
+            _ => productsQuery.OrderBy(p => p.Name).ThenBy(p => p.Id)
+        };
 
         var totalItems = await query.CountAsync();
 

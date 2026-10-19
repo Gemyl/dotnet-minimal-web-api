@@ -1,7 +1,7 @@
 import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateProduct, Product, ProductsPagedResponse } from '../../../features/models/products.model';
+import { CreateProduct, PagedRequest, Product, ProductsPagedResponse } from '../../../features/models/products.model';
 import { httpResource } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../../environments/environment.development';
@@ -12,14 +12,15 @@ import { environment } from '../../../../environments/environment.development';
 
 export class ProductsService {
   private _http = inject(HttpClient);
-  public query = signal({page: 1, pageSize: 10});
+  public query = signal<PagedRequest>({page: 1, pageSize: 10, sortBy: 'name', sortDirection: 'asc'});
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
-  private readonly productsUrl: string = environment.PRODUCTS_URl;
+  private productsUrl: string = environment.PRODUCTS_URl;
 
   productsResource = httpResource<ProductsPagedResponse>(() => {
     if (!this.isBrowser) return undefined;
-    return `${this.productsUrl}?page=${this.query().page}&pageSize=${this.query().pageSize}`
+    const query = this.query();
+    return `${this.productsUrl}?page=${query.page}&pageSize=${query.pageSize}&sortBy=${query.sortBy}&sortDirection=${query.sortDirection}`
   }, {
     defaultValue: undefined,
   });

@@ -93,4 +93,13 @@ export class Categories {
       ...{ pageSize: Number(event.target.value) }
     }));
   }
+
+  onSortChange(sortBy: 'name'): void {
+    this._categoriesService.query.update((query) => ({
+      ...query,
+      page: 1,
+      sortDirection: query.sortBy === sortBy && query.sortDirection === 'asc' ? 'desc' : 'asc',
+      sortBy
+    }));
+  }
 }

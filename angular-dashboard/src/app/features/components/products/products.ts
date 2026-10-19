@@ -132,4 +132,13 @@ export class Products {
     }));
   }
 
+  onSortChange(sortBy: 'name' | 'price' | 'category'): void {
+    this._productsService.query.update((query) => ({
+      ...query,
+      page: 1,
+      sortDirection: query.sortBy === sortBy && query.sortDirection === 'asc' ? 'desc' : 'asc',
+      sortBy
+    }));
+  }
+
 }

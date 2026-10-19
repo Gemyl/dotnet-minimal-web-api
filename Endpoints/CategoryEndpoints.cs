@@ -25,12 +25,16 @@ public static class CategoryEndpoints
         IDistributedCache cache,
         int page,
         int pageSize,
-        bool all = false
+        bool all = false,
+        string sortBy = "name",
+        string sortDirection = "asc"
     )
     {
+        var descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+        var normalizedSortBy = sortBy.ToLowerInvariant();
         var pageTag = page.ToString();
         var pageSizeTag = all ? "all" : pageSize.ToString();
-        string cacheKey = $"categories:page-{page}:size-{pageSizeTag}";
+        string cacheKey = $"categories:page-{page}:size-{pageSizeTag}:sort-{normalizedSortBy}-{(descending ? "desc" : "asc")}";
         var cachedResponse = await cache.GetRecordAsync<PagedResponseDto<CategoryDto>>(cacheKey);
 
         if (cachedResponse is not null)
@@ -38,9 +42,12 @@ public static class CategoryEndpoints
             return Results.Ok(cachedResponse);
         }
 
-        var query = db.Categories
-        .AsNoTracking()
-        .OrderBy(p => p.Id);
+        var categoriesQuery = db.Categories.AsNoTracking();
+        var query = (normalizedSortBy, descending) switch
+        {
+            ("name", true) => categoriesQuery.OrderByDescending(c => c.Name).ThenBy(c => c.Id),
+            _ => categoriesQuery.OrderBy(c => c.Name).ThenBy(c => c.Id)
+        };
 
         var totalItems = await query.CountAsync();
         var categories = new List<CategoryDto>();

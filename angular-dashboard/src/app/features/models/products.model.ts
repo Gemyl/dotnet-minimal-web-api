@@ -15,3 +15,11 @@ export interface ProductsPagedResponse {
     totalItems: number,
     totalPages: number
 }
+
+export interface PagedRequest {
+    page: number, 
+    pageSize: number, 
+    all?: boolean, 
+    sortBy: string, 
+    sortDirection: string
+}
