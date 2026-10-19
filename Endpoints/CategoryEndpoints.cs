@@ -24,10 +24,13 @@ public static class CategoryEndpoints
         AppDbContext db, 
         IDistributedCache cache,
         int page,
-        int pageSize
+        int pageSize,
+        bool all = false
     )
     {
-        string cacheKey = $"categories:page-{page}:size-{pageSize}";
+        var pageTag = page.ToString();
+        var pageSizeTag = all ? "all" : pageSize.ToString();
+        string cacheKey = $"categories:page-{page}:size-{pageSizeTag}";
         var cachedResponse = await cache.GetRecordAsync<PagedResponseDto<CategoryDto>>(cacheKey);
 
         if (cachedResponse is not null)
@@ -40,15 +43,27 @@ public static class CategoryEndpoints
         .OrderBy(p => p.Id);
 
         var totalItems = await query.CountAsync();
-
-        var categories = await query
-        .Skip((page - 1) * pageSize)
-        .Take(pageSize)
-        .Select(c => new CategoryDto(
-            c.Id, 
-            c.Name
-        ))
-        .ToListAsync();
+        var categories = new List<CategoryDto>();
+        if (all)
+        {
+            categories = await query
+            .Select(c => new CategoryDto(
+                c.Id,
+                c.Name
+            ))
+            .ToListAsync();
+            ;
+        } else
+        {
+            categories = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => new CategoryDto(
+                c.Id, 
+                c.Name
+            ))
+            .ToListAsync();
+        }
 
         var response = new PagedResponseDto<CategoryDto>
         {

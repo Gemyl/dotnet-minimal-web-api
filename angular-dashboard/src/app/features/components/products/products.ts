@@ -56,6 +56,15 @@ export class Products {
     };
   })
 
+  constructor() {
+    this._categoriesService.query.update((value) => ({
+      ...value,
+      ...{
+        all: true
+      }
+    }));
+  }
+
   public onFormSubmit() {
     this._productsService.createProduct(this.createProductModel()).subscribe((response) => {
       if (response.id) {
