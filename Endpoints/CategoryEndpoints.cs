@@ -6,6 +6,7 @@ using MyWebApi.Models;
 using MyWebApi.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
 using MyWebApi.Services;
+using System.Text.Json;
 
 public static class CategoryEndpoints
 {
@@ -27,14 +28,41 @@ public static class CategoryEndpoints
         int pageSize,
         bool all = false,
         string sortBy = "name",
-        string sortDirection = "asc"
+        string sortDirection = "asc",
+        string filters = ""
     )
     {
+        List<CategoriesFilterDto> filtersDtos = [];
+        if (!string.IsNullOrWhiteSpace(filters))
+        {
+            try
+            {
+                filtersDtos = JsonSerializer.Deserialize<List<CategoriesFilterDto>>(
+                    filters,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }
+                ) ?? [];
+            } 
+
+            catch(JsonException)
+            {
+                throw new Exception("Invalid JSON.");
+            }
+        }
+
         var descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
         var normalizedSortBy = sortBy.ToLowerInvariant();
         var pageTag = page.ToString();
         var pageSizeTag = all ? "all" : pageSize.ToString();
+
         string cacheKey = $"categories:page-{page}:size-{pageSizeTag}:sort-{normalizedSortBy}-{(descending ? "desc" : "asc")}";
+        foreach (var filter in filtersDtos)
+        {
+            cacheKey += $":{filter.Field}-{filter.Operator}-{filter.Value}";
+        }
+
         var cachedResponse = await cache.GetRecordAsync<PagedResponseDto<CategoryDto>>(cacheKey);
 
         if (cachedResponse is not null)
@@ -42,11 +70,24 @@ public static class CategoryEndpoints
             return Results.Ok(cachedResponse);
         }
 
-        var categoriesQuery = db.Categories.AsNoTracking();
-        var query = (normalizedSortBy, descending) switch
+        var query = db.Categories.AsNoTracking();
+
+        CategoriesFiltering.ApplyFilters(
+            query,
+            filtersDtos,
+            out query,
+            out var error
+        );
+
+        if (error is not null)
         {
-            ("name", true) => categoriesQuery.OrderByDescending(c => c.Name).ThenBy(c => c.Id),
-            _ => categoriesQuery.OrderBy(c => c.Name).ThenBy(c => c.Id)
+            return Results.BadRequest(error);
+        }
+
+        query = (normalizedSortBy, descending) switch
+        {
+            ("name", true) => query.OrderByDescending(c => c.Name).ThenBy(c => c.Id),
+            _ => query.OrderBy(c => c.Name).ThenBy(c => c.Id)
         };
 
         var totalItems = await query.CountAsync();
