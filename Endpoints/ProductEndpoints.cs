@@ -6,6 +6,7 @@ using MyWebApi.Filters;
 using MyWebApi.Extensions;
 using MyWebApi.Services;
 using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 namespace MyWebApi.Endpoints;
 
 public static class ProductEndpoints
@@ -27,33 +28,67 @@ public static class ProductEndpoints
         int page, 
         int pageSize,
         string sortBy = "name",
-        string sortDirection = "asc"
+        string sortDirection = "asc",
+        string filters = ""
     )
     {
+        List<ProductsFiltersDto> filtersDtos = [];
+        if (!string.IsNullOrWhiteSpace(filters))
+        {
+            try
+            {
+                filtersDtos = JsonSerializer.Deserialize<List<ProductsFiltersDto>>(
+                    filters,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }
+                ) ?? [];
+            }
+
+            catch(JsonException)
+            {
+                throw new Exception("Invalid JSON.");
+            }
+        }
 
         var descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
         var normalizedSortBy = sortBy.ToLowerInvariant();
         string cacheKey = $"products:page-{page}:size-{pageSize}:sort-{normalizedSortBy}-{(descending ? "desc" : "asc")}";
+        
+        foreach (var filter in filtersDtos)
+        {
+            cacheKey += $":{filter.Field}-{filter.Operator}-{filter.Value}";
+        }
+        
         var cachedResponse = await cache.GetRecordAsync<PagedResponseDto<ProductDto>>(cacheKey);
-
+        
         if (cachedResponse is not null)
         {
             return Results.Ok(cachedResponse);
         }
 
-        var productsQuery = db.Products.AsNoTracking();
-        var query = (normalizedSortBy, descending) switch
+        var query = db.Products.AsNoTracking();
+        
+        ProductsFiltering.ApplyFilters(query, filtersDtos, out query, out var error);
+
+        if (error is not null)
         {
-            ("price", false) => productsQuery.OrderBy(p => p.Price).ThenBy(p => p.Id),
-            ("price", true) => productsQuery.OrderByDescending(p => p.Price).ThenBy(p => p.Id),
-            ("category", false) => productsQuery.OrderBy(p => p.Category.Name).ThenBy(p => p.Id),
-            ("category", true) => productsQuery.OrderByDescending(p => p.Category.Name).ThenBy(p => p.Id),
-            (_, true) => productsQuery.OrderByDescending(p => p.Name).ThenBy(p => p.Id),
-            _ => productsQuery.OrderBy(p => p.Name).ThenBy(p => p.Id)
+            return Results.Problem(error);
+        }
+        
+        query = (normalizedSortBy, descending) switch
+        {
+            ("price", false) => query.OrderBy(p => p.Price).ThenBy(p => p.Id),
+            ("price", true) => query.OrderByDescending(p => p.Price).ThenBy(p => p.Id),
+            ("category", false) => query.OrderBy(p => p.Category.Name).ThenBy(p => p.Id),
+            ("category", true) => query.OrderByDescending(p => p.Category.Name).ThenBy(p => p.Id),
+            (_, true) => query.OrderByDescending(p => p.Name).ThenBy(p => p.Id),
+            _ => query.OrderBy(p => p.Name).ThenBy(p => p.Id)
         };
 
         var totalItems = await query.CountAsync();
-
+        
         var products = await query
         .Skip((page - 1) * pageSize)
         .Take(pageSize)
