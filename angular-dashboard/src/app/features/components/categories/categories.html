@@ -9,17 +9,29 @@
     </div>
     <div class="flex flex-col w-1/2 items-start ms-5">
         <div class="flex flex-col justify-between items-center w-full my-auto">
+            <div
+                class="w-full flex flex-row justify-start items-center h-10 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 text-lg px-4 text-center align-middle">
+                <button type="button" class="w-3/4 text-start cursor-pointer hover:text-gray-800" (click)="onSortChange('name')">Title {{_categoriesService.query().sortDirection === 'asc' ? '↑' : '↓'}}</button>
+                <p class="w-1/4 text-center px-4">Actions</p>
+            </div>
+            <div
+                class="w-full flex flex-row justify-start items-center min-h-14 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 px-4 text-center align-middle">
+                <div class="flex flex-row items-center gap-1 w-1/4 pr-2">
+                    <input type="text" aria-label="Filter by title" placeholder="Filter title" class="rounded-md border outline-none px-2 py-1 min-w-0 w-1/2 text-sm"
+                        [value]="filterValues().name" (input)="onFilterValueChange('name', $any($event.target).value)"/>
+                    <select aria-label="Title filter operator" class="rounded-md border bg-white px-1 py-1 min-w-0 w-1/2 text-xs"
+                        [value]="filterOperators().name" (change)="onFilterOperatorChange('name', $any($event.target).value)">
+                        <option value="contains">Contains</option>
+                        <option value="equals">Equals</option>
+                    </select>
+                </div>
+            </div>
             @if (_categoriesService.categoriesResource.isLoading() || !_categoriesService.categoriesResource.hasValue()) {
                 <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
                 <p class="mt-4 text-lg">Loading categories</p>
             } @else if (_categoriesService.categoriesResource.error()) {
                 <p class="text-red-600">An error occured. Try again.</p>
             } @else if (categories().length > 0) {
-                <div
-                    class="w-full flex flex-row justify-start items-center h-10 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 text-lg px-4 text-center align-middle">
-                    <button type="button" class="w-3/4 text-start cursor-pointer hover:text-gray-800" (click)="onSortChange('name')">Title {{_categoriesService.query().sortDirection === 'asc' ? '↑' : '↓'}}</button>
-                    <p class="w-1/4 text-center px-4">Actions</p>
-                </div>
                 @for(item of categories(); track item.id; let idx = $index;){
                     <div class="flex flex-row w-full justify-start bg-gray-100 hover:bg-gray-200 py-2 mb-2 rounded-xl shadow-md">
                         <div class="flex flex-row justify-start items-center px-2 py-1 w-3/4">
@@ -72,7 +84,7 @@
                     </div>
                 </div>
             } @else {
-                <p>No categories in the list</p>
+                <p class="mt-5 text-gray-600">No categories records were found</p>
             }
         </div>
     </div>

@@ -21,6 +21,8 @@ export class Categories {
   protected editCategoryForm = form(this.editCategoryModel);
   protected _categoriesService = inject(CategoriesService);
   protected hoveredItemIndex = signal(-1);
+  protected filterValues = signal({name: ''});
+  protected filterOperators = signal({name: 'contains'});
   protected categories = computed(() => {
     if (this._categoriesService.categoriesResource.hasValue()) {
       return this._categoriesService.categoriesResource.value().items;
@@ -70,6 +72,34 @@ export class Categories {
       id: '',
       name: ''
     });
+  }
+
+  protected onFilterValueChange(field: 'name', value: string) {
+    this.filterValues.update((filters) => ({...filters, [field]: value}));
+    this.onFiltersUpdate();
+  }
+
+  protected onFilterOperatorChange(field: 'name', operator: string) {
+    this.filterOperators.update((filters) => ({...filters, [field]: operator}));
+    this.onFiltersUpdate();
+  }
+
+  private onFiltersUpdate() {
+    const values = this.filterValues();
+    const operators = this.filterOperators();
+    const filters: { Field: string, Operator: string, Value: string}[] = [];
+
+    if (values.name.trim()) {
+      filters.push({Field: 'name', Operator: operators.name, Value: values.name});
+    }
+
+    this._categoriesService.query.update((value) => ({
+      ...value,
+      ...{
+        page: 1,
+        filters: filters.length > 0 ? JSON.stringify(filters) : undefined
+      }
+    }));
   }
 
   onItemHover(index: number) {

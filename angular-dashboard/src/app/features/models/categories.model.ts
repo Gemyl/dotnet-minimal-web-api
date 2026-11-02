@@ -16,5 +16,6 @@ export interface CategoriesPagedResponse {
     page: number,
     pageSize: number,
     totalItems: number,
-    totalPages: number
+    totalPages: number,
+    fitlers?: string
 }

@@ -21,7 +21,8 @@ export class CategoriesService {
     () => {
       if (!this.isBrowser) return undefined;
       const query = this.query();
-      return `${this.categoriesUrl}?page=${query.page}&pageSize=${query.pageSize}&all=${query.all}&sortBy=${query.sortBy}&sortDirection=${query.sortDirection}`
+      const filters = query.filters ? `&filters=${encodeURIComponent(query.filters)}` : '';
+      return `${this.categoriesUrl}?page=${query.page}&pageSize=${query.pageSize}&all=${query.all}&sortBy=${query.sortBy}&sortDirection=${query.sortDirection}${filters}`
     },{
       defaultValue: undefined
     }
