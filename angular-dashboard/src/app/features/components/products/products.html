@@ -14,22 +14,56 @@
             type="button" (click)="onFormSubmit()" [disabled]="createProductForm().invalid()">Add Product</button>
         </div>
     </div>
-    <div class="flex flex-col w-1/2 items-start ms-5">
+    <div class="flex flex-col w-[70%] items-start ms-5">
         <div class="flex flex-col justify-between items-center w-full my-auto">
+            <div
+                class="w-full flex flex-row justify-start items-center h-10 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 text-lg px-4 text-center align-middle">
+                <button type="button" class="w-1/4 text-start cursor-pointer hover:text-gray-800" (click)="onSortChange('name')">Title {{_productsService.query().sortBy === 'name' ? (_productsService.query().sortDirection === 'asc' ? '↑' : '↓') : '↕'}}</button>
+                <button type="button" class="w-1/4 text-start px-2 cursor-pointer hover:text-gray-800" (click)="onSortChange('price')">Price {{_productsService.query().sortBy === 'price' ? (_productsService.query().sortDirection === 'asc' ? '↑' : '↓') : '↕'}}</button>
+                <button type="button" class="w-1/4 text-start px-2 cursor-pointer hover:text-gray-800" (click)="onSortChange('category')">Category {{_productsService.query().sortBy === 'category' ? (_productsService.query().sortDirection === 'asc' ? '↑' : '↓') : '↕'}}</button>
+                <p class="w-1/4 text-center px-4">Actions</p>
+            </div>
+            <div
+                class="w-full flex flex-row justify-start items-center min-h-14 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 px-4 text-center align-middle">
+                <div class="flex flex-row items-center gap-1 w-1/4 pr-2">
+                    <input type="text" aria-label="Filter by title" placeholder="Filter title" class="rounded-md border outline-none px-2 py-1 min-w-0 w-1/2 text-sm"
+                        [value]="filterValues().name" (input)="onFilterValueChange('name', $any($event.target).value)"/>
+                    <select aria-label="Title filter operator" class="rounded-md border bg-white px-1 py-1 min-w-0 w-1/2 text-xs"
+                        [value]="filterOperators().name" (change)="onFilterOperatorChange('name', $any($event.target).value)">
+                        <option value="contains">Contains</option>
+                        <option value="equals">Equals</option>
+                    </select>
+                </div>
+                <div class="flex flex-row items-center gap-1 w-1/4 px-2">
+                    <input type="number" aria-label="Filter by price" placeholder="Price" class="rounded-md border outline-none px-2 py-1 min-w-0 w-1/2 text-sm"
+                        [value]="filterValues().price" (input)="onFilterValueChange('price', $any($event.target).value)"/>
+                    <select aria-label="Price filter operator" class="rounded-md border bg-white px-1 py-1 min-w-0 w-1/2 text-xs"
+                        [value]="filterOperators().price" (change)="onFilterOperatorChange('price', $any($event.target).value)">
+                        <option value="equals">Equals</option>
+                        <option value="greaterThan">Greater Than</option>
+                        <option value="greaterThanOrEqual">Greater Than or Equal</option>
+                        <option value="lessThan">Less Than</option>
+                        <option value="lessThanOrEqual">Less Than or Equal</option>
+                    </select>
+                </div>
+                <div class="flex flex-row items-center w-1/4 px-2">
+                    <select aria-label="Filter by category" class="rounded-md border bg-white px-2 py-1 min-w-0 w-full text-sm"
+                        [value]="filterValues().category" (change)="onFilterValueChange('category', $any($event.target).value)">
+                        <option value="">Any category</option>
+                        @for (category of _categoriesService.categoriesResource.value()?.items; track category.id) {
+                            <option [value]="category.id">{{category.name}}</option>
+                        }
+                    </select>
+                </div>
+                <div class="w-1/4"></div>
+            </div>
             @if (_productsService.productsResource.isLoading() || !_productsService.productsResource.hasValue()) {
                 <mat-progress-spinner mode="indeterminate" diameter="50">
                 </mat-progress-spinner>
                 <p class="mt-4 text-lg">Loading products</p>
             } @else if (_productsService.productsResource.error()) {
                 <p class="text-red-600">An error occured. Try again.</p>
-            } @else if (products().length > 0) {
-                <div
-                    class="w-full flex flex-row justify-start items-center h-10 rounded-sm shadow-lg border border-gray-300 mb-1 text-gray-500 text-lg px-4 text-center align-middle">
-                    <button type="button" class="w-1/4 text-start cursor-pointer hover:text-gray-800" (click)="onSortChange('name')">Title {{_productsService.query().sortBy === 'name' ? (_productsService.query().sortDirection === 'asc' ? '↑' : '↓') : '↕'}}</button>
-                    <button type="button" class="w-1/4 text-start px-2 cursor-pointer hover:text-gray-800" (click)="onSortChange('price')">Price {{_productsService.query().sortBy === 'price' ? (_productsService.query().sortDirection === 'asc' ? '↑' : '↓') : '↕'}}</button>
-                    <button type="button" class="w-1/4 text-start px-2 cursor-pointer hover:text-gray-800" (click)="onSortChange('category')">Category {{_productsService.query().sortBy === 'category' ? (_productsService.query().sortDirection === 'asc' ? '↑' : '↓') : '↕'}}</button>
-                    <p class="w-1/4 text-center px-4">Actions</p>
-                </div>
+            } @else {
                 @for(item of products(); track item.id; let idx = $index;){
                     <div class="flex flex-row w-full justify-start bg-gray-100 hover:bg-gray-200 py-2 mb-2 rounded-xl shadow-md">
                         <div class="flex flex-row justify-start items-center px-2 py-1 w-3/4">
@@ -68,33 +102,35 @@
                         </div>
                     </div>
                 }
-                <div class="flex flex-row justify-between items-center w-full mt-2 px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 shadow-md text-gray-600">
-                    <div class="flex items-center gap-2">
-                        <label for="product-page-size" class="text-sm">Rows per page</label>
-                        <select id="product-page-size" class="border border-gray-300 rounded-md bg-white px-2 py-1 text-sm"
-                            [value]="_productsService.query().pageSize"
-                            (change)="onPageSizeChange($event)">
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
+                @if (products().length > 0) {
+                    <div class="flex flex-row justify-between items-center w-full mt-2 px-3 py-2 rounded-xl bg-gray-100 border border-gray-300 shadow-md text-gray-600">
+                        <div class="flex items-center gap-2">
+                            <label for="product-page-size" class="text-sm">Rows per page</label>
+                            <select id="product-page-size" class="border border-gray-300 rounded-md bg-white px-2 py-1 text-sm"
+                                [value]="_productsService.query().pageSize"
+                                (change)="onPageSizeChange($event)">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                        <span>{{_productsService.productsResource.value().totalItems}} Items</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm">Page {{_productsService.productsResource.value().page}} of {{_productsService.productsResource.value().totalPages}}</span>
+                            <button type="button" aria-label="Previous page"
+                                class="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                                [disabled]="_productsService.query().page <= 1"
+                                (click)="onPageChange(_productsService.query().page - 1)">‹</button>
+                            <button type="button" aria-label="Next page"
+                                class="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                                [disabled]="_productsService.query().page >= _productsService.productsResource.value().totalPages"
+                                (click)="onPageChange(_productsService.query().page + 1)">›</button>
+                        </div>
                     </div>
-                    <span>{{_productsService.productsResource.value().totalItems}} Items</span>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm">Page {{_productsService.productsResource.value().page}} of {{_productsService.productsResource.value().totalPages}}</span>
-                        <button type="button" aria-label="Previous page"
-                            class="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                            [disabled]="_productsService.query().page <= 1"
-                            (click)="onPageChange(_productsService.query().page - 1)">‹</button>
-                        <button type="button" aria-label="Next page"
-                            class="px-3 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed"
-                            [disabled]="_productsService.query().page >= _productsService.productsResource.value().totalPages"
-                            (click)="onPageChange(_productsService.query().page + 1)">›</button>
-                    </div>
-                </div>
-            } @else {
-                <p>No products in the list</p>
+                } @else {
+                    <p class="mt-5 text-gray-600">No products match the current filters</p>
+                }
             }
         </div>
     </div>

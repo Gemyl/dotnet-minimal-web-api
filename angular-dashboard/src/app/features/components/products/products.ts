@@ -33,6 +33,8 @@ export class Products {
   protected _productsService = inject(ProductsService);
   protected _categoriesService = inject(CategoriesService);
   protected hoveredItemIndex = signal(-1);
+  protected filterValues = signal({ name: '', price: '', category: '' });
+  protected filterOperators = signal({ name: 'contains', price: 'equals', category: 'equals' });
   protected products = computed(() => {
     if (this._productsService.productsResource.hasValue()) {
       let products: any = [];
@@ -138,6 +140,38 @@ export class Products {
       page: 1,
       sortDirection: query.sortBy === sortBy && query.sortDirection === 'asc' ? 'desc' : 'asc',
       sortBy
+    }));
+  }
+
+  onFilterValueChange(field: 'name' | 'price' | 'category', value: string): void {
+    this.filterValues.update((filters) => ({ ...filters, [field]: value }));
+    this.updateProductFilters();
+  }
+
+  onFilterOperatorChange(field: 'name' | 'price' | 'category', operator: string): void {
+    this.filterOperators.update((operators) => ({ ...operators, [field]: operator }));
+    this.updateProductFilters();
+  }
+
+  private updateProductFilters(): void {
+    const values = this.filterValues();
+    const operators = this.filterOperators();
+    const filters: { Field: string; Operator: string; Value: string | number }[] = [];
+
+    if (values.name.trim()) {
+      filters.push({ Field: 'name', Operator: operators.name, Value: values.name.trim() });
+    }
+    if (values.price !== '') {
+      filters.push({ Field: 'price', Operator: operators.price, Value: Number(values.price) });
+    }
+    if (values.category) {
+      filters.push({ Field: 'category', Operator: operators.category, Value: values.category });
+    }
+
+    this._productsService.query.update((query) => ({
+      ...query,
+      page: 1,
+      filters: filters.length > 0 ? JSON.stringify(filters) : undefined
     }));
   }
 

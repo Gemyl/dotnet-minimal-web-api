@@ -20,7 +20,8 @@ export class ProductsService {
   productsResource = httpResource<ProductsPagedResponse>(() => {
     if (!this.isBrowser) return undefined;
     const query = this.query();
-    return `${this.productsUrl}?page=${query.page}&pageSize=${query.pageSize}&sortBy=${query.sortBy}&sortDirection=${query.sortDirection}`
+    const filters = query.filters ? `&filters=${encodeURIComponent(query.filters)}` : '';
+    return `${this.productsUrl}?page=${query.page}&pageSize=${query.pageSize}&sortBy=${query.sortBy}&sortDirection=${query.sortDirection}${filters}`
   }, {
     defaultValue: undefined,
   });

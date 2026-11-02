@@ -21,5 +21,6 @@ export interface PagedRequest {
     pageSize: number, 
     all?: boolean, 
     sortBy: string, 
-    sortDirection: string
+    sortDirection: string,
+    filters?: string
 }
