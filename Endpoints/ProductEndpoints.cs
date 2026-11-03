@@ -3,7 +3,6 @@ using MyWebApi.Data;
 using MyWebApi.Models;
 using MyWebApi.DTOs;
 using MyWebApi.Filters;
-using MyWebApi.Extensions;
 using MyWebApi.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
@@ -24,7 +23,7 @@ public static class ProductEndpoints
 
     private static async Task<IResult> GetAllProducts(
         AppDbContext db, 
-        IDistributedCache cache, 
+        CacheService cache, 
         int page, 
         int pageSize,
         string sortBy = "name",
@@ -116,7 +115,7 @@ public static class ProductEndpoints
     private static async Task<IResult> GetProductById(
         Guid id, 
         AppDbContext db, 
-        IDistributedCache cache
+        CacheService cache
     )
     {
         string cacheKey = $"{id}";
@@ -146,8 +145,7 @@ public static class ProductEndpoints
     private static async Task<IResult> CreateProduct(
         CreateProductDto newProduct, 
         AppDbContext db, 
-        IDistributedCache cache,
-        CacheService cacheService
+        CacheService cache
     )
     {
         var product = new Product
@@ -160,7 +158,7 @@ public static class ProductEndpoints
 
         db.Products.Add(product);
         await db.SaveChangesAsync();
-        await cacheService.RemoveKeyByPatternAsync("redis_products:*");
+        await cache.RemoveKeyByPatternAsync("redis_products:*");
 
         var responseDto = new ProductDto(
             product.Id, 
@@ -173,9 +171,8 @@ public static class ProductEndpoints
 
     private static async Task<IResult> UpdateProduct(
         Product product, 
-        AppDbContext db, 
-        IDistributedCache cache,
-        CacheService cacheService
+        AppDbContext db,
+        CacheService cache
     )
     {
         var selectedProduct = await db.Products.FindAsync(product.Id);
@@ -187,7 +184,7 @@ public static class ProductEndpoints
 
         await db.SaveChangesAsync();
         await cache.RemoveAsync(product.Id.ToString());
-        await cacheService.RemoveKeyByPatternAsync("redis_products:*");
+        await cache.RemoveKeyByPatternAsync("redis_products:*");
 
         var responseDto = new ProductDto(
             selectedProduct.Id, 
@@ -200,9 +197,8 @@ public static class ProductEndpoints
 
     private static async Task<IResult> DeleteProduct(
         Guid id, 
-        AppDbContext db, 
-        IDistributedCache cache,
-        CacheService cacheService
+        AppDbContext db,
+        CacheService cache
     )
     {
         var product = await db.Products.FindAsync(id);
@@ -211,7 +207,7 @@ public static class ProductEndpoints
         db.Products.Remove(product);
         await db.SaveChangesAsync();
         await cache.RemoveAsync(id.ToString());
-        await cacheService.RemoveKeyByPatternAsync("redis_products:*");
+        await cache.RemoveKeyByPatternAsync("redis_products:*");
 
         return Results.Ok(product.Id);
     }
