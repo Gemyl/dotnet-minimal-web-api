@@ -19,6 +19,7 @@
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.*" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-  </ItemGroup>
+    <Compile Remove="dotnet-minimal-web-api.Tests/**/*.cs"/>
+ </ItemGroup>
 
 </Project>
